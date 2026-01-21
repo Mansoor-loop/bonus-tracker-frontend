@@ -74,6 +74,7 @@ export default function Dashboard() {
 
   const [feAgents, setFeAgents] = useState({ totalRecords: 0, teamBreakdown: {} });
   const [summaryRows, setSummaryRows] = useState([]);
+  const inFlightRef = React.useRef(false);
 
   const dateInputStyle = {
     border: "4px solid #000",
@@ -143,19 +144,28 @@ export default function Dashboard() {
       setLoading(false);
     }
   }
+ useEffect(() => {
+  loadAll();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+}, [range, team, effectiveRange.start_date, effectiveRange.end_date]);
 
 useEffect(() => {
-  // auto refresh every 10 minutes
-  const id = setInterval(() => {
-    // avoid overlapping requests
-    if (!loading) {
-      loadAll();
+  // only auto-refresh for today/week (not custom)
+  if (range === "custom") return;
+
+  const id = setInterval(async () => {
+    if (inFlightRef.current) return;
+    inFlightRef.current = true;
+    try {
+      await loadAll();
+    } finally {
+      inFlightRef.current = false;
     }
   }, AUTO_REFRESH_MS);
 
   return () => clearInterval(id);
   // eslint-disable-next-line react-hooks/exhaustive-deps
-}, [range, team, effectiveRange.start_date, effectiveRange.end_date]);
+}, [range, team]);
 
 
   async function handleManualRefresh() {
@@ -176,7 +186,7 @@ useEffect(() => {
   const topRows = useMemo(() => summaryRows.slice(0, 25), [summaryRows]);
 
   return (
-    <div style={{ minHeight: "100vh", background: "5B8E7D", padding: 18, fontFamily: "system-ui" }}>
+    <div style={{ minHeight: "100vh", background: "transparent", padding: 18, fontFamily: "system-ui" }}>
       {loading && <MoneyLoader text={range === "custom" ? "Loading custom range..." : "Loading dashboard..."} />}
 
       <div style={{ maxWidth: 1100, margin: "0 auto" }}>
@@ -221,7 +231,7 @@ useEffect(() => {
             <PillButton active={range === "week"} onClick={() => setRange("week")} disabled={loading}>
               WEEKLY
             </PillButton>
-{/* 
+
             <PillButton
               active={range === "custom"}
               onClick={() => {
@@ -232,7 +242,7 @@ useEffect(() => {
               disabled={loading}
             >
               CUSTOM
-            </PillButton> */}
+            </PillButton>
 
             {range === "custom" && (
               <div style={{ display: "flex", gap: 12, marginTop: 10, flexWrap: "wrap" }}>
