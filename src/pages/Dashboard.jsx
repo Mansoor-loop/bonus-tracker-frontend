@@ -4,7 +4,7 @@ import { fetchFeAgents, fetchFeSummary, refreshBackend } from "../api/summary";
 import MoneyLoader from "../components/MoneyLoader";
 
 const TEAMS = ["ALL", "Legends", "Maserati", "Falcons", "Sharks"];
-
+const AUTO_REFRESH_MS = 10 * 60 * 1000;
 function fmtUSD0(n) {
   const x = Number(n || 0);
   return "$" + Math.round(x).toLocaleString();
@@ -144,10 +144,19 @@ export default function Dashboard() {
     }
   }
 
-  useEffect(() => {
-    loadAll();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [range, team, effectiveRange.start_date, effectiveRange.end_date]);
+useEffect(() => {
+  // auto refresh every 10 minutes
+  const id = setInterval(() => {
+    // avoid overlapping requests
+    if (!loading) {
+      loadAll();
+    }
+  }, AUTO_REFRESH_MS);
+
+  return () => clearInterval(id);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+}, [range, team, effectiveRange.start_date, effectiveRange.end_date]);
+
 
   async function handleManualRefresh() {
     setLoading(true);
