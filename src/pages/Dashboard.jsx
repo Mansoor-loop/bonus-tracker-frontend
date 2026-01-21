@@ -184,6 +184,33 @@ useEffect(() => {
   }
 
   const topRows = useMemo(() => summaryRows.slice(0, 25), [summaryRows]);
+ const MEDALS = {
+  1: "https://cdn-icons-png.flaticon.com/128/13461/13461118.png", // Gold
+  2: "https://cdn-icons-png.flaticon.com/128/13461/13461115.png", // Silver
+  3: "https://cdn-icons-png.flaticon.com/128/13461/13461099.png", // Bronze
+};
+
+function RankCell({ idx }) {
+  const rank = idx + 1;
+  const medal = MEDALS[rank];
+
+  if (medal) {
+    return (
+      <img
+        src={medal}
+        alt={`Rank ${rank}`}
+        style={{
+          width: 25,
+          height: 26,
+          display: "block",
+        }}
+      />
+    );
+  }
+
+  return <span style={{ fontWeight: 1200 }}>{rank}</span>;
+}
+
 
   return (
     <div style={{ minHeight: "100vh", background: "transparent", padding: 18, fontFamily: "system-ui" }}>
@@ -377,7 +404,16 @@ useEffect(() => {
                       style={{ borderBottom: "3px solid #000" }}
                     >
                       <td style={{ padding: 10, fontWeight: 1000, border: "3px solid #000" }}>
-                        {idx + 1}
+                          <div
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              height: "100%",
+                            }}
+                          >
+                            <RankCell idx={idx} />
+                          </div>
                       </td>
                       <td style={{ padding: 10, fontWeight: 1000, border: "3px solid #000" }}>
                         {r.qualifier}
