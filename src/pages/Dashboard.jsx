@@ -212,8 +212,8 @@ export default function Dashboard() {
             <PillButton active={range === "week"} onClick={() => setRange("week")} disabled={loading}>
               WEEKLY
             </PillButton>
-
-            {/* <PillButton
+{/* 
+            <PillButton
               active={range === "custom"}
               onClick={() => {
                 setRange("custom");
