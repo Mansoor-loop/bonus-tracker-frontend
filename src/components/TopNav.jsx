@@ -26,7 +26,12 @@ function NavButton({ to, label, active, bg }) {
 
 export default function TopNav() {
   const loc = useLocation();
-  const isDashboard = loc.pathname === "/";
+
+  // ✅ support both "/" and "/dashboard" as dashboard route
+  const isDashboard =
+    loc.pathname === "/" || loc.pathname.startsWith("/dashboard");
+
+  const isTopGuns = loc.pathname.startsWith("/top-guns");
   const isAdmin = loc.pathname.startsWith("/admin");
 
   return (
@@ -40,13 +45,21 @@ export default function TopNav() {
         marginBottom: 16,
       }}
     >
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
-        {/* Left brand like "HABIT CRUSHER" */}
-      <NavButton to="/" label="BONUS TRACKER" active={isDashboard} bg="#FFFFFF" />
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          gap: 12,
+        }}
+      >
+        {/* Left brand */}
+        <NavButton to="/" label="BONUS TRACKER" active={isDashboard} bg="#FFFFFF" />
 
-        {/* Right buttons like screenshot */}
+        {/* Right buttons */}
         <div style={{ display: "flex", gap: 10 }}>
           <NavButton to="/" label="DASHBOARD" active={isDashboard} bg="#FFFFFF" />
+          <NavButton to="/top-guns" label="TOP GUNS" active={isTopGuns} bg="#FFFFFF" />
           <NavButton to="/admin" label="ADMIN LOGIN" active={isAdmin} bg="#FF4D4D" />
         </div>
       </div>

@@ -1,0 +1,13 @@
+.tg-wrap{
+  display: grid;
+  gap: 120px;                 /* ✅ this is the space between cards */
+  padding: 10px;
+
+  /* ✅ makes it responsive and creates natural gaps even on wide screens */
+  grid-template-columns: repeat(auto-fit, minmax(30px, 300px));
+
+  /* ✅ prevents the grid from stretching cards to fill the whole row */
+  justify-content: center;
+
+  align-items: start;
+}

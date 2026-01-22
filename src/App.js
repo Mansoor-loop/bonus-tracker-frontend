@@ -3,15 +3,17 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 import Dashboard from "./pages/Dashboard";
 import AdminBonus from "./pages/AdminBonus";
 import TopNav from "./components/TopNav";
+import TopGuns from "./pages/TopGuns";
 
 export default function App() {
   return (
     <BrowserRouter>
       <div style={{ minHeight: "100vh", padding: 18, fontFamily: "system-ui" }}>
-        <div style={{ maxWidth: 1100, margin: "0 auto" }}>
+        <div style={{ maxWidth: 1400, margin: "0 auto" }}>
           <TopNav />
           <Routes>
-            <Route path="/" element={<Dashboard />} />
+            <Route path="/" element={<Dashboard />} />           
+            <Route path="/top-guns" element={<TopGuns />} />
             <Route path="/admin" element={<AdminBonus />} />
           </Routes>
         </div>
