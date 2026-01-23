@@ -12,7 +12,9 @@ import loren from  "../assests/agents/Lorenmurray.png"  ;
 import tia from  "../assests/agents/Tiagreen.png"  ;
 import mustafa from  "../assests/agents/Mustafablue.png"  ;
 import leader from  "../assests/agents/leader.png"  ;
-import verraricka from  "../assests/agents/verrackia.png"  ;
+import verraricka from  "../assests/agents/ron.png"  ;
+import ron from  "../assests/agents/verrackia.png"  ;
+import rhode from "../assests/agents/rhode.png"
 // fallback image
 import placeholder from  "../assests/agents/shadow.png" ;
 
@@ -30,8 +32,8 @@ export const QUALIFIER_IMAGE_MAP = {
   "MUSTAFA PUELLO": mustafa,
   "VERRARICKA HOSEA": verraricka,
   "KEVIN GONCALVES": kevin,
-  "RON MASELKO": placeholder,
-
+  "RON MASELKO": ron,
+  "RHODE RAPHAEL": rhode
 };
 
 export function getQualifierImage(name) {
