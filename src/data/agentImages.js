@@ -12,8 +12,8 @@ import loren from  "../assests/agents/Lorenmurray.png"  ;
 import tia from  "../assests/agents/Tiagreen.png"  ;
 import mustafa from  "../assests/agents/Mustafablue.png"  ;
 import leader from  "../assests/agents/leader.png"  ;
-import verraricka from  "../assests/agents/ron.png"  ;
-import ron from  "../assests/agents/verrackia.png"  ;
+import ron from  "../assests/agents/ron.png"  ;
+import verraricka from  "../assests/agents/verrackia.png"  ;
 import rhode from "../assests/agents/rhode.png"
 // fallback image
 import placeholder from  "../assests/agents/shadow.png" ;
