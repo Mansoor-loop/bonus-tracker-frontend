@@ -23,7 +23,6 @@ function SketchCard({ bg, children }) {
     </div>
   );
 }
-
 function pillStyle(bg = "#fff") {
   return {
     display: "inline-flex",
@@ -56,9 +55,9 @@ function stageBg(outcome) {
   if (s.includes("sale")) return "#BFF7C6"; // light green
   if (s.includes("returned")) return "#FFC9C9"; // light red
   if (s.includes("processing")) return "#FFF8DE"; // neon green
+  if (s.includes("home office")) return "#c6b1ee";
   return "#E5E7EB";
 }
-
 /* =========================
    Data helpers
 ========================= */
@@ -88,13 +87,14 @@ function firstName(full) {
 }
 
 // you said you already have this — kept here for complete file
-function normalizeOutcome(raw) {
+function normalizeOutcome(raw,closerStatus) {
   const s = String(raw || "").trim();
-
+  const cs = String(closerStatus || "").trim();
+  if (/^processing$/i.test(s) && /^home\s*office$/i.test(cs)) return "Home Office";
   if (/^lead$/i.test(s)) return "Returned";
   if (/^deal$/i.test(s)) return "Sale";
   if (/^processing$/i.test(s)) return "Processing";
-
+ console.log(s)
   return s || "-";
 }
 
@@ -157,7 +157,7 @@ export default function QueueManagement() {
       {
         key: "outcome",
         label: "Outcome",
-        get: (r) => normalizeOutcome(r.processingStage),
+        get: (r) => normalizeOutcome(r.processingStage,r.closerStatus ),
         type: "string",
       },
     ],
@@ -216,15 +216,17 @@ export default function QueueManagement() {
     let sale = 0;
     let processing = 0;
     let returned = 0;
+    let homeOffice =0;
 
     for (const r of rows) {
-      const out = normalizeOutcome(r.processingStage);
+      const out = normalizeOutcome(r.processingStage,r.closerStatus);
       if (out === "Sale") sale += 1;
       else if (out === "Processing") processing += 1;
       else if (out === "Returned") returned += 1;
+      else if (out === "Home Office") homeOffice += 1;
     }
 
-    return { total, sale, processing, returned };
+    return { total, sale, processing, returned,homeOffice };
   }, [rows]);
 
   return (
@@ -243,6 +245,7 @@ export default function QueueManagement() {
                 <span style={pillStyle("#BFF7C6")}>Sale: {counts.sale}</span>
                 <span style={pillStyle("#FFF8DE")}>Processing: {counts.processing}</span>
                 <span style={pillStyle("#FFC9C9")}>Returned: {counts.returned}</span>
+                <span style={pillStyle("#c6b1ee")}>Home Office: {counts.homeOffice}</span>
               </div>
             </div>
 
@@ -309,7 +312,7 @@ export default function QueueManagement() {
 
                 <tbody>
                   {sortedRows.map((r, idx) => {
-                    const outcome = normalizeOutcome(r.processingStage);
+                    const outcome = normalizeOutcome(r.processingStage, r.closerStatus);
 
                     return (
                       <tr key={`${r.customerId || idx}`}>
