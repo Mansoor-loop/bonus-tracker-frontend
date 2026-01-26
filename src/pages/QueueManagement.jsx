@@ -55,7 +55,7 @@ function stageBg(outcome) {
   const s = String(outcome || "").toLowerCase();
   if (s.includes("sale")) return "#BFF7C6"; // light green
   if (s.includes("returned")) return "#FFC9C9"; // light red
-  if (s.includes("processing")) return "#39FF14"; // neon green
+  if (s.includes("processing")) return "#FFF8DE"; // neon green
   return "#E5E7EB";
 }
 
