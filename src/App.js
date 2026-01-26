@@ -4,6 +4,7 @@ import Dashboard from "./pages/Dashboard";
 import AdminBonus from "./pages/AdminBonus";
 import TopNav from "./components/TopNav";
 import TopGuns from "./pages/TopGuns";
+import QueueManagement from "./pages/QueueManagement";
 
 export default function App() {
   return (
@@ -15,6 +16,7 @@ export default function App() {
             <Route path="/" element={<Dashboard />} />           
             <Route path="/top-guns" element={<TopGuns />} />
             <Route path="/admin" element={<AdminBonus />} />
+            <Route path="/queue" element={<QueueManagement />} />
           </Routes>
         </div>
       </div>

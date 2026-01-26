@@ -33,7 +33,7 @@ export default function TopNav() {
 
   const isTopGuns = loc.pathname.startsWith("/top-guns");
   const isAdmin = loc.pathname.startsWith("/admin");
-
+  const isQueue = loc.pathname.startsWith("/queue");
   return (
     <div
       style={{
@@ -60,6 +60,7 @@ export default function TopNav() {
         <div style={{ display: "flex", gap: 10 }}>
           <NavButton to="/" label="DASHBOARD" active={isDashboard} bg="#FFFFFF" />
           <NavButton to="/top-guns" label="TOP GUNS" active={isTopGuns} bg="#FFFFFF" />
+          <NavButton to="/queue" label="QUEUE" active={isQueue} bg="#FFFFFF" />
           <NavButton to="/admin" label="ADMIN LOGIN" active={isAdmin} bg="#FF4D4D" />
         </div>
       </div>
