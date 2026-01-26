@@ -241,7 +241,7 @@ export default function QueueManagement() {
               <div style={{ marginTop: 10, display: "flex", gap: 10, flexWrap: "wrap" }}>
                 <span style={pillStyle("#fff")}>Validations: {counts.total}</span>
                 <span style={pillStyle("#BFF7C6")}>Sale: {counts.sale}</span>
-                <span style={pillStyle("#39FF14")}>Processing: {counts.processing}</span>
+                <span style={pillStyle("#FFF8DE")}>Processing: {counts.processing}</span>
                 <span style={pillStyle("#FFC9C9")}>Returned: {counts.returned}</span>
               </div>
             </div>
