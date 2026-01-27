@@ -54,8 +54,8 @@ function teamBg(team) {
 function stageBg(outcome) {
   const s = String(outcome || "").toLowerCase();
   if (s.includes("sale")) return "#BFF7C6"; // light green
-  if (s.includes("returned")) return "#FFC9C9"; // light red
-  if (s.includes("processing")) return "#FFF8DE"; // neon green
+  if (s.includes("returned")) return "#E57373"; // light red
+  if (s.includes("processing")) return "#FFF1A8"; // neon green
   if (s.includes("home office")) return "#c6b1ee";
   return "#E5E7EB";
 }
@@ -148,10 +148,11 @@ export default function QueueManagement() {
       { key: "sr", label: "Sr #", get: (_r, idx) => idx + 1, type: "number" },
       { key: "time", label: "Time", get: (r) => r.time, type: "time" },
       { key: "customerId", label: "Customer ID", get: (r) => r.customerId, type: "string" },
+      { key: "qualifierName", label: "Qualifier", get: (r) => firstName(r.qualifierName), type: "string" },
       { key: "state", label: "State", get: (r) => r.state, type: "string" },
       { key: "carrier", label: "Carrier", get: (r) => r.carrier, type: "string" },
       { key: "product", label: "Product", get: (r) => r.product, type: "string" },
-      { key: "qualifierName", label: "Qualifier", get: (r) => firstName(r.qualifierName), type: "string" },
+      
       { key: "team", label: "Team", get: (r) => r.team, type: "string" },
       { key: "Validator", label: "Validator", get: (r) => firstName(r.Validator), type: "string" },
       {
@@ -209,6 +210,12 @@ export default function QueueManagement() {
 
     return data;
   }, [rows, sort.key, sort.dir, columns]);
+ function rowBgByOutcome(outcome) {
+  if (outcome === "Sale") return "#E9FBEF"; // light green row
+  else if (outcome === "Processing") return "#FFF8DE"; 
+  else if (outcome === "Returned") return "#FFC9C9"; 
+  return "#FFFFFF";
+}
 
   // counts above table
   const counts = useMemo(() => {
@@ -286,7 +293,9 @@ export default function QueueManagement() {
               <div className="qm-tableScale">
                 <table style={{ width: "100%", borderCollapse: "collapse" }}>
                   <thead>
-                    <tr style={{ background: "#FFA500" }}>
+                  
+
+                    <tr  style={{ background: "#FFA500" }}>
                       {columns.map((c) => {
                         const active = sort.key === c.key;
                         const arrow = active ? (sort.dir === "asc" ? " ▲" : " ▼") : "";
@@ -313,63 +322,60 @@ export default function QueueManagement() {
                     </tr>
                   </thead>
 
-                  <tbody>
-                    {sortedRows.map((r, idx) => {
-                      const outcome = normalizeOutcome(r.processingStage, r.closerStatus);
+                 <tbody>
+  {sortedRows.map((r, idx) => {
+    const outcome = normalizeOutcome(r.processingStage, r.closerStatus);
 
-                      return (
-                        <tr key={`${r.customerId || idx}`}>
-                          <td style={{ padding: 10, border: "3px solid #000", fontWeight: 1200, textAlign: "center" }}>
-                            {idx + 1}
-                          </td>
+    return (
 
-                          <td style={{ padding: 10, border: "3px solid #000", fontWeight: 1000 }}>
-                            {r.time || "-"}
-                          </td>
+      <tr
+        key={`${r.customerId || idx}`}
+        style={{ background: rowBgByOutcome(outcome) }}
+      >
+        <td style={{ padding: 10, border: "3px solid #000", fontWeight: 1200, textAlign: "center" }}>
+          {idx + 1}
+        </td>
 
-                          <td style={{ padding: 10, border: "3px solid #000", fontWeight: 1100 }}>
-                            {r.customerId || "-"}
-                          </td>
+        <td style={{ padding: 10, border: "3px solid #000", fontWeight: 1000 }}>
+          {r.time || "-"}
+        </td>
 
-                          <td style={{ padding: 10, border: "3px solid #000", fontWeight: 1100 }}>
-                            {r.state || "-"}
-                          </td>
+        <td style={{ padding: 10, border: "3px solid #000", fontWeight: 1100 }}>
+          {r.customerId || "-"}
+        </td>
+        <td style={{ padding: 10, border: "3px solid #000", fontWeight: 1200 }}>
+          <span style={pillStyle("#E0F2FE")}>{firstName(r.qualifierName)}</span>
+        </td>
+        <td style={{ padding: 10, border: "3px solid #000", fontWeight: 1100 }}>
+          {r.state || "-"}
+        </td>
 
-                          <td style={{ padding: 10, border: "3px solid #000" }}>
-                            <span style={pillStyle("#D1FAE5")}>{r.carrier || "-"}</span>
-                          </td>
+        <td style={{ padding: 10, border: "3px solid #000" }}>
+          <span >{r.carrier || "-"}</span>
+        </td>
 
-                          <td style={{ padding: 10, border: "3px solid #000" }}>
-                            <span style={pillStyle("#E0F2FE")}>{r.product || "-"}</span>
-                          </td>
+        <td style={{ padding: 10, border: "3px solid #000" }}>
+          <span >{r.product || "-"}</span>
+        </td>
 
-                          <td style={{ padding: 10, border: "3px solid #000", fontWeight: 1200 }}>
-                            <span style={pillStyle("#E0F2FE")}>{firstName(r.qualifierName)}</span>
-                          </td>
 
-                          <td style={{ padding: 10, border: "3px solid #000" }}>
-                            <span style={pillStyle(teamBg(r.team))}>{r.team || "-"}</span>
-                          </td>
 
-                          <td style={{ padding: 10, border: "3px solid #000" }}>
-                            <span style={pillStyle("#E0F2FE")}>{firstName(r.Validator)}</span>
-                          </td>
+        <td style={{ padding: 10, border: "3px solid #000" }}>
+          <span >{r.team || "-"}</span>
+        </td>
 
-                          <td style={{ padding: 10, border: "3px solid #000" }}>
-                            <span style={pillStyle(stageBg(outcome))}>{outcome}</span>
-                          </td>
-                        </tr>
-                      );
-                    })}
+        <td style={{ padding: 10, border: "3px solid #000" }}>
+          <span style={pillStyle("#E0F2FE")}>{firstName(r.Validator)}</span>
+        </td>
 
-                    {!loading && !err && sortedRows.length === 0 && (
-                      <tr>
-                        <td colSpan={10} style={{ padding: 12, fontWeight: 900 }}>
-                          No rows returned.
-                        </td>
-                      </tr>
-                    )}
-                  </tbody>
+        <td style={{ padding: 10, border: "3px solid #000" }}>
+          <span style={pillStyle(stageBg(outcome))}>{outcome}</span>
+        </td>
+      </tr>
+    );
+  })}
+</tbody>
+
                 </table>
               </div>
             </div>
