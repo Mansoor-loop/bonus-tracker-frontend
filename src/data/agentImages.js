@@ -1,22 +1,23 @@
 // frontend/src/data/qualifierImages.js
 
-import stephanie from "../assests/agents/stephanie.png" ;
-import mozell from  "../assests/agents/Mozellblue.png"  ;
-import catherine from  "../assests/agents/Catherineanimate.png"  ;
-import kevin from  "../assests/agents/Kevinblue.png"  ;
-import donovan from  "../assests/agents/donovanblue.png"  ;
-import robert from  "../assests/agents/robertgreen.png"  ;
-import johnb from  "../assests/agents/johngreen.png"  ;
-import chase from  "../assests/agents/Chase.png"  ;
-import loren from  "../assests/agents/Lorenmurray.png"  ;
-import tia from  "../assests/agents/Tiagreen.png"  ;
-import mustafa from  "../assests/agents/Mustafablue.png"  ;
-import leader from  "../assests/agents/leader.png"  ;
-import ron from  "../assests/agents/ron.png"  ;
-import verraricka from  "../assests/agents/verrackia.png"  ;
-import rhode from "../assests/agents/rhode.png"
+import stephanie from "../assests/agents/stephanie.png";
+import mozell from "../assests/agents/Mozellblue.png";
+import catherine from "../assests/agents/Catherineanimate.png";
+import kevin from "../assests/agents/Kevinblue.png";
+import donovan from "../assests/agents/donovanblue.png";
+import robert from "../assests/agents/robertgreen.png";
+import johnb from "../assests/agents/johngreen.png";
+import chase from "../assests/agents/Chase.png";
+import loren from "../assests/agents/Lorenmurray.png";
+import tia from "../assests/agents/Tiagreen.png";
+import mustafa from "../assests/agents/Mustafablue.png";
+import leader from "../assests/agents/leader.png";
+import ron from "../assests/agents/ron.png";
+import verraricka from "../assests/agents/verrackia.png";
+import rhode from "../assests/agents/rhode.png";
+
 // fallback image
-import placeholder from  "../assests/agents/shadow.png" ;
+import placeholder from "../assests/agents/shadow.png";
 
 export const QUALIFIER_IMAGE_MAP = {
   "MOZELL HARDY": mozell,
@@ -33,12 +34,21 @@ export const QUALIFIER_IMAGE_MAP = {
   "VERRARICKA HOSEA": verraricka,
   "KEVIN GONCALVES": kevin,
   "RON MASELKO": ron,
-  "RHODE RAPHAEL": rhode
+  "RHODE RAPHAEL": rhode,
 };
 
-export function getQualifierImage(name) {
-  if (!name) return placeholder;
+function normalizeKey(name) {
+  return String(name || "")
+    .trim()
+    .toUpperCase()
+    .replace(/\s+/g, " ");
+}
 
-  const key = String(name).trim().toUpperCase();
+export function getQualifierImage(name) {
+  const key = normalizeKey(name);
   return QUALIFIER_IMAGE_MAP[key] || placeholder;
+}
+
+export function normalizeQualifierKey(name) {
+  return normalizeKey(name);
 }
