@@ -316,7 +316,7 @@ function playSaleSound() {
           if (!shownStatus.has(statusKey)) {
             shownStatus.add(statusKey);
             saveSet(SHOWN_STATUS_STORAGE_KEY, shownStatus);
-
+            playSaleSound();
             let msg = "";
             if (outcome === "Processing") msg = makeMessage(PROCESSING_QUOTES, qName);
             else if (outcome === "Returned") msg = makeMessage(RETURNED_QUOTES, qName);
@@ -346,8 +346,9 @@ function playSaleSound() {
         // 3) BECOMES SALE -> show sale popup ONCE
         if (outcome === "Sale" && prevOutcome !== "Sale" && !shownSales.has(key)) {
           shownSales.add(key);
+          
           saveSet(SHOWN_SALES_STORAGE_KEY, shownSales);
-
+          playSaleSound();
           enqueuePopup({
             type: "sale",
             title: `${qName} MADE A SALE! ✅`,
@@ -362,7 +363,7 @@ function playSaleSound() {
 
         // store latest outcome
         prevMap.set(key, outcome);
-        playSaleSound();
+        
       }
 
       // cap prevMap growth
