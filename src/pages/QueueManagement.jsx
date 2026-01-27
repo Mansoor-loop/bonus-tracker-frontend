@@ -2,6 +2,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import MoneyLoader from "../components/MoneyLoader";
 import { fetchQueueToday } from "../api/queue";
+import "../QueueManagement.css";
 
 const AUTO_REFRESH_MS = 2 * 60 * 1000; // 2 mins
 
@@ -58,6 +59,7 @@ function stageBg(outcome) {
   if (s.includes("home office")) return "#c6b1ee";
   return "#E5E7EB";
 }
+
 /* =========================
    Data helpers
 ========================= */
@@ -86,15 +88,14 @@ function firstName(full) {
   return s.split(/\s+/)[0] || "-";
 }
 
-// you said you already have this — kept here for complete file
-function normalizeOutcome(raw,closerStatus) {
+// kept as-is (your logic)
+function normalizeOutcome(raw, closerStatus) {
   const s = String(raw || "").trim();
   const cs = String(closerStatus || "").trim();
   if (/^processing$/i.test(s) && /^home\s*office$/i.test(cs)) return "Home Office";
   if (/^lead$/i.test(s)) return "Returned";
   if (/^deal$/i.test(s)) return "Sale";
   if (/^processing$/i.test(s)) return "Processing";
- console.log(s)
   return s || "-";
 }
 
@@ -134,7 +135,6 @@ export default function QueueManagement() {
   // auto refresh every 2 mins (no loader, keep old data visible)
   useEffect(() => {
     const id = setInterval(() => {
-      // avoid overlapping refreshes
       if (!refreshing) load({ silent: true });
     }, AUTO_REFRESH_MS);
 
@@ -157,7 +157,7 @@ export default function QueueManagement() {
       {
         key: "outcome",
         label: "Outcome",
-        get: (r) => normalizeOutcome(r.processingStage,r.closerStatus ),
+        get: (r) => normalizeOutcome(r.processingStage, r.closerStatus),
         type: "string",
       },
     ],
@@ -216,17 +216,17 @@ export default function QueueManagement() {
     let sale = 0;
     let processing = 0;
     let returned = 0;
-    let homeOffice =0;
+    let homeOffice = 0;
 
     for (const r of rows) {
-      const out = normalizeOutcome(r.processingStage,r.closerStatus);
+      const out = normalizeOutcome(r.processingStage, r.closerStatus);
       if (out === "Sale") sale += 1;
       else if (out === "Processing") processing += 1;
       else if (out === "Returned") returned += 1;
       else if (out === "Home Office") homeOffice += 1;
     }
 
-    return { total, sale, processing, returned,homeOffice };
+    return { total, sale, processing, returned, homeOffice };
   }, [rows]);
 
   return (
@@ -280,105 +280,98 @@ export default function QueueManagement() {
 
         <div style={{ marginTop: 18 }}>
           <SketchCard bg="#FFFFFF">
-            <div style={{ overflowX: "auto" }}>
-              <table style={{ width: "100%", borderCollapse: "collapse", minWidth: 1200 }}>
-                <thead>
-                  <tr style={{ background: "#FFA500" }}>
-                    {columns.map((c) => {
-                      const active = sort.key === c.key;
-                      const arrow = active ? (sort.dir === "asc" ? " ▲" : " ▼") : "";
+            {/* ✅ This viewport forces the whole table area to fit inside the window */}
+            <div className="qm-tableViewport">
+              {/* ✅ This scale wrapper shrinks the table on smaller screens (no color/shape changes) */}
+              <div className="qm-tableScale">
+                <table style={{ width: "100%", borderCollapse: "collapse" }}>
+                  <thead>
+                    <tr style={{ background: "#FFA500" }}>
+                      {columns.map((c) => {
+                        const active = sort.key === c.key;
+                        const arrow = active ? (sort.dir === "asc" ? " ▲" : " ▼") : "";
+                        return (
+                          <th
+                            key={c.key}
+                            onClick={() => toggleSort(c.key)}
+                            title="Click to sort"
+                            style={{
+                              textAlign: "left",
+                              padding: 10,
+                              border: "3px solid #000",
+                              fontWeight: 1200,
+                              whiteSpace: "nowrap",
+                              cursor: "pointer",
+                              userSelect: "none",
+                            }}
+                          >
+                            {c.label}
+                            {arrow}
+                          </th>
+                        );
+                      })}
+                    </tr>
+                  </thead>
+
+                  <tbody>
+                    {sortedRows.map((r, idx) => {
+                      const outcome = normalizeOutcome(r.processingStage, r.closerStatus);
+
                       return (
-                        <th
-                          key={c.key}
-                          onClick={() => toggleSort(c.key)}
-                          title="Click to sort"
-                          style={{
-                            textAlign: "left",
-                            padding: 10,
-                            border: "3px solid #000",
-                            fontWeight: 1200,
-                            whiteSpace: "nowrap",
-                            cursor: "pointer",
-                            userSelect: "none",
-                          }}
-                        >
-                          {c.label}
-                          {arrow}
-                        </th>
+                        <tr key={`${r.customerId || idx}`}>
+                          <td style={{ padding: 10, border: "3px solid #000", fontWeight: 1200, textAlign: "center" }}>
+                            {idx + 1}
+                          </td>
+
+                          <td style={{ padding: 10, border: "3px solid #000", fontWeight: 1000 }}>
+                            {r.time || "-"}
+                          </td>
+
+                          <td style={{ padding: 10, border: "3px solid #000", fontWeight: 1100 }}>
+                            {r.customerId || "-"}
+                          </td>
+
+                          <td style={{ padding: 10, border: "3px solid #000", fontWeight: 1100 }}>
+                            {r.state || "-"}
+                          </td>
+
+                          <td style={{ padding: 10, border: "3px solid #000" }}>
+                            <span style={pillStyle("#D1FAE5")}>{r.carrier || "-"}</span>
+                          </td>
+
+                          <td style={{ padding: 10, border: "3px solid #000" }}>
+                            <span style={pillStyle("#E0F2FE")}>{r.product || "-"}</span>
+                          </td>
+
+                          <td style={{ padding: 10, border: "3px solid #000", fontWeight: 1200 }}>
+                            <span style={pillStyle("#E0F2FE")}>{firstName(r.qualifierName)}</span>
+                          </td>
+
+                          <td style={{ padding: 10, border: "3px solid #000" }}>
+                            <span style={pillStyle(teamBg(r.team))}>{r.team || "-"}</span>
+                          </td>
+
+                          <td style={{ padding: 10, border: "3px solid #000" }}>
+                            <span style={pillStyle("#E0F2FE")}>{firstName(r.Validator)}</span>
+                          </td>
+
+                          <td style={{ padding: 10, border: "3px solid #000" }}>
+                            <span style={pillStyle(stageBg(outcome))}>{outcome}</span>
+                          </td>
+                        </tr>
                       );
                     })}
-                  </tr>
-                </thead>
 
-                <tbody>
-                  {sortedRows.map((r, idx) => {
-                    const outcome = normalizeOutcome(r.processingStage, r.closerStatus);
-
-                    return (
-                      <tr key={`${r.customerId || idx}`}>
-                        {/* Sr # */}
-                        <td style={{ padding: 10, border: "3px solid #000", fontWeight: 1200, textAlign: "center" }}>
-                          {idx + 1}
-                        </td>
-
-                        {/* Time */}
-                        <td style={{ padding: 10, border: "3px solid #000", fontWeight: 1000 }}>
-                          {r.time || "-"}
-                        </td>
-
-                        {/* Customer ID */}
-                        <td style={{ padding: 10, border: "3px solid #000", fontWeight: 1100 }}>
-                          {r.customerId || "-"}
-                        </td>
-
-                        {/* State */}
-                        <td style={{ padding: 10, border: "3px solid #000", fontWeight: 1100 }}>
-                          {r.state || "-"}
-                        </td>
-
-                        {/* Carrier */}
-                        <td style={{ padding: 10, border: "3px solid #000" }}>
-                          <span style={pillStyle("#D1FAE5")}>{r.carrier || "-"}</span>
-                        </td>
-
-                        {/* Product */}
-                        <td style={{ padding: 10, border: "3px solid #000" }}>
-                          <span style={pillStyle("#E0F2FE")}>{r.product || "-"}</span>
-                        </td>
-
-                        {/* Qualifier first name */}
-                        <td style={{ padding: 10, border: "3px solid #000", fontWeight: 1200 }}>
-                        <span style={pillStyle("#E0F2FE")}> {firstName(r.qualifierName)} </span>
-                          
-                        </td>
-
-                        {/* Team */}
-                        <td style={{ padding: 10, border: "3px solid #000" }}>
-                          <span style={pillStyle(teamBg(r.team))}>{r.team || "-"}</span>
-                        </td>
-
-                        {/* Validator first name */}
-                        <td style={{ padding: 10, border: "3px solid #000" }}>
-                          <span style={pillStyle("#E0F2FE")}>{firstName(r.Validator)}</span>
-                        </td>
-
-                        {/* Outcome */}
-                        <td style={{ padding: 10, border: "3px solid #000" }}>
-                          <span style={pillStyle(stageBg(outcome))}>{outcome}</span>
+                    {!loading && !err && sortedRows.length === 0 && (
+                      <tr>
+                        <td colSpan={10} style={{ padding: 12, fontWeight: 900 }}>
+                          No rows returned.
                         </td>
                       </tr>
-                    );
-                  })}
-
-                  {!loading && !err && sortedRows.length === 0 && (
-                    <tr>
-                      <td colSpan={10} style={{ padding: 12, fontWeight: 900 }}>
-                        No rows returned.
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
+                    )}
+                  </tbody>
+                </table>
+              </div>
             </div>
           </SketchCard>
         </div>
