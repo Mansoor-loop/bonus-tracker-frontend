@@ -9,6 +9,7 @@ import saleSound from "../assests/sounds/Sale.mp3";
 const AUTO_REFRESH_MS = 2 * 60 * 1000; // 2 mins
 const POPUP_MS = 40 * 1000; // 40 seconds
 
+
 // storage keys (so events show only once)
 const SHOWN_SALES_STORAGE_KEY = "qm_shown_sales_v1";
 const SEEN_RECORDS_STORAGE_KEY = "qm_seen_records_v1";
@@ -63,7 +64,7 @@ function stageBg(outcome) {
   const s = String(outcome || "").toLowerCase();
   if (s.includes("sale")) return "#BFF7C6"; // light green
   if (s.includes("returned")) return "#E57373"; // light red
-  if (s.includes("processing")) return "#FFF1A8"; // neon
+  if (s.includes("processing")) return "#B1F0F7"; // neon
   if (s.includes("home office")) return "#c6b1ee";
   return "#E5E7EB";
 }
@@ -109,7 +110,7 @@ function normalizeOutcome(raw, closerStatus) {
 
 function rowBgByOutcome(outcome) {
   if (outcome === "Sale") return "#E9FBEF"; // green row
-  else if (outcome === "Processing") return "#FFF8DE";
+  else if (outcome === "Processing") return "#E8F9FF";
   else if (outcome === "Returned") return "#FFC9C9";
   return "#FFFFFF";
 }
@@ -195,6 +196,8 @@ function makeMessage(templateArr, name) {
 ========================= */
 export default function QueueManagement() {
   const [rows, setRows] = useState([]);
+  const [tip, setTip] = useState(null);
+
   const [loading, setLoading] = useState(true); // initial load only
   const [refreshing, setRefreshing] = useState(false); // silent refresh
   const [err, setErr] = useState("");
@@ -305,7 +308,7 @@ function playSaleSound() {
             time: safeStr(r.time),
             customerId: safeStr(r.customerId),
             imageUrl,
-            bg: outcome === "Returned" ? "#FFC9C9" : outcome === "Processing" ? "#FFF1A8" : outcome === "Home Office" ? "#c6b1ee" : "#E0F2FE",
+            bg: outcome === "Returned" ? "#FFC9C9" : outcome === "Processing" ? "#ABDADC" : outcome === "Home Office" ? "#c6b1ee" : "#E0F2FE",
           });
         }
 
@@ -337,7 +340,7 @@ function playSaleSound() {
                 time: safeStr(r.time),
                 customerId: safeStr(r.customerId),
                 imageUrl,
-                bg: outcome === "Returned" ? "#FFC9C9" : outcome === "Processing" ? "#FFF1A8" : outcome === "Home Office" ? "#c6b1ee" : "#E0F2FE",
+                bg: outcome === "Returned" ? "#FFC9C9" : outcome === "Processing" ? "#ABDADC" : outcome === "Home Office" ? "#c6b1ee" : "#E0F2FE",
               });
             }
           }
@@ -410,6 +413,7 @@ function playSaleSound() {
       { key: "product", label: "Product", get: (r) => r.product, type: "string" },
       { key: "team", label: "Team", get: (r) => r.team, type: "string" },
       { key: "Validator", label: "Validator", get: (r) => firstName(r.Validator), type: "string" },
+      { key: "FeedBack", label: "FeedBack", get: (r) => r.FeedBack, type: "string" },
       {
         key: "outcome",
         label: "Outcome",
@@ -543,7 +547,7 @@ function playSaleSound() {
               <div style={{ marginTop: 10, display: "flex", gap: 10, flexWrap: "wrap" }}>
                 <span style={pillStyle("#fff")}>Validations: {counts.total}</span>
                 <span style={pillStyle("#BFF7C6")}>Sale: {counts.sale}</span>
-                <span style={pillStyle("#FFF8DE")}>Processing: {counts.processing}</span>
+                <span style={pillStyle("#B1F0F7")}>Processing: {counts.processing}</span>
                 <span style={pillStyle("#FFC9C9")}>Returned: {counts.returned}</span>
                 <span style={pillStyle("#c6b1ee")}>Home Office: {counts.homeOffice}</span>
               </div>
@@ -652,6 +656,27 @@ function playSaleSound() {
                           <td style={{ padding: 10, border: "3px solid #000" }}>
                             <span style={pillStyle("#E0F2FE")}>{firstName(r.Validator)}</span>
                           </td>
+                          <td style={{ padding: 10, border: "3px solid #000" }}>
+                            <span
+                              onMouseEnter={(e) => {
+                                const notes = safeStr(r.Notes);
+                                if (!notes) return;
+                                setTip({ x: e.clientX, y: e.clientY, text: notes });
+                              }}
+                              onMouseMove={(e) => {
+                                if (!tip) return;
+                                setTip((prev) => (prev ? { ...prev, x: e.clientX, y: e.clientY } : prev));
+                              }}
+                              onMouseLeave={() => setTip(null)}
+                              style={{
+                                cursor: safeStr(r.Notes) ? "help" : "default",
+                                fontWeight: 900,
+                              }}
+                            >
+                              {safeStr(r.Feedback) || "-"}
+                            </span>
+                          </td>
+
 
                           <td style={{ padding: 10, border: "3px solid #000" }}>
                             <span style={pillStyle(stageBg(outcome))}>{outcome}</span>
@@ -666,6 +691,27 @@ function playSaleSound() {
           </SketchCard>
         </div>
       </div>
+        {tip && (
+  <div
+    style={{
+      position: "fixed",
+      left: tip.x + 12,
+      top: tip.y + 12,
+      zIndex: 99999,
+      maxWidth: 360,
+      background: "#FFF8DE",
+      border: "4px solid #000",
+      borderRadius: 14,
+      padding: "10px 12px",
+      boxShadow: "8px 8px 0 #000",
+      fontWeight: 900,
+      pointerEvents: "none",
+      whiteSpace: "pre-wrap",
+    }}
+  >
+    {tip.text}
+  </div>
+)}
 
     </div>
   );

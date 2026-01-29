@@ -31,34 +31,59 @@ frontend/src/QueueManagement.css
     transform: scale(0.67);
   }
 } */
-@media (max-width: 1030px) {
+@media (max-width: 1160px) {
   .qm-tableScale {
     transform: scale(0.90);
   }
 }
-@media (max-width: 970px) {
+@media (max-width: 1100px) {
   .qm-tableScale {
-    transform: scale(0.84);
+    transform: scale(0.85);
   }
 }
-@media (max-width: 900px) {
+@media (max-width:1050px) {
+  .qm-tableScale {
+    transform: scale(0.80);
+  }
+}
+@media (max-width: 1000px) {
+  .qm-tableScale {
+    transform: scale(0.74);
+  }
+}
+@media (max-width:950px) {
   .qm-tableScale {
     transform: scale(0.70);
   }
 }
-@media (max-width: 760px) {
+@media (max-width: 900px) {
   .qm-tableScale {
-    transform: scale(0.60);
+    transform: scale(0.66);
+  }
+}
+@media (max-width: 850px) {
+  .qm-tableScale {
+    transform: scale(0.62);
+  }
+}
+@media (max-width: 790px) {
+  .qm-tableScale {
+    transform: scale(0.58);
+  }
+}
+@media (max-width: 745px) {
+  .qm-tableScale {
+    transform: scale(0.54);
   }
 }
 @media (max-width: 700px) {
   .qm-tableScale {
-    transform: scale(0.46);
+    transform: scale(0.50);
   }
 }
-@media (max-width: 650px) {
+@media (max-width: 660px) {
   .qm-tableScale {
-    transform: scale(0.43);
+    transform: scale(0.45);
   }
 }
 @media (max-width: 600px) {
