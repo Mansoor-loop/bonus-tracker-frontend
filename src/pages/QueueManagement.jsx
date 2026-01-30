@@ -5,7 +5,8 @@ import { fetchQueueToday } from "../api/queue";
 import "../QueueManagement.css";
 import { getQualifierImage, normalizeQualifierKey } from "../data/agentImages";
 import saleSound from "../assests/sounds/Sale.mp3";
-
+import scoobySound from "../assests/sounds/scoobysound.mp3";
+import scooby  from "../assests/agents/scooby.png";
 const AUTO_REFRESH_MS = 2 * 60 * 1000; // 2 mins
 const POPUP_MS = 40 * 1000; // 40 seconds
 
@@ -50,14 +51,14 @@ function pillStyle(bg = "#fff") {
 }
 
 // team colors
-function teamBg(team) {
-  const t = String(team || "").toLowerCase();
-  if (t.includes("legends")) return "#BFF7C6";
-  if (t.includes("maserati")) return "#B7E6FF";
-  if (t.includes("falcons")) return "#C7B7FF";
-  if (t.includes("sharks")) return "#FFE7B7";
-  return "#fff";
-}
+// function teamBg(team) {
+//   const t = String(team || "").toLowerCase();
+//   if (t.includes("legends")) return "#BFF7C6";
+//   if (t.includes("maserati")) return "#B7E6FF";
+//   if (t.includes("falcons")) return "#C7B7FF";
+//   if (t.includes("sharks")) return "#FFE7B7";
+//   return "#fff";
+// }
 
 // outcome colors
 function stageBg(outcome) {
@@ -194,9 +195,104 @@ function makeMessage(templateArr, name) {
 /* =========================
    Page
 ========================= */
+function TeamDropdown({ value, options, onChange }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef(null);
+
+  useEffect(() => {
+    function onClickOutside(e) {
+      if (ref.current && !ref.current.contains(e.target)) {
+        setOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", onClickOutside);
+    return () => document.removeEventListener("mousedown", onClickOutside);
+  }, []);
+
+  return (
+    <div ref={ref} style={{ position: "relative", minWidth: 170 }}>
+      {/* Button */}
+      <button
+        onClick={() => setOpen((v) => !v)}
+        style={{
+          width: "100%",
+          background: "#fff",
+          border: "5px solid #000",
+          borderRadius: 18,
+          padding: "10px 14px",
+          fontSize: 14,
+          fontWeight: 1100,
+          textAlign: "left",
+          boxShadow: "6px 6px 0 #000",
+          cursor: "pointer",
+        }}
+      >
+        {value}
+        <span style={{ float: "right" }}>▾</span>
+      </button>
+
+      {/* Dropdown */}
+      {open && (
+        <div
+          style={{
+            position: "absolute",
+            top: "110%",
+            left: 0,
+            width: "100%",
+            background: "#fff",
+            border: "2px solid #000",
+            borderTopLeftRadius: 0,
+            borderTopRightRadius: 0,
+            borderBottomLeftRadius: 18,
+            borderBottomRightRadius: 18,
+
+
+            overflow: "hidden",
+            zIndex: 9999,
+          }}
+        >
+          {options.map((opt) => (
+            <div
+              key={opt}
+              onClick={() => {
+                onChange(opt);
+                setOpen(false);
+              }}
+              style={{
+                padding: "10px 14px",
+                fontWeight: 1100,
+                fontSize: 14,
+                cursor: "pointer",
+                background: opt === value ? "#000" : "#fff",
+                color: opt === value ? "#fff" : "#000",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = "#000";
+                e.currentTarget.style.color = "#fff";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background =
+                  opt === value ? "#000" : "#fff";
+                e.currentTarget.style.color =
+                  opt === value ? "#fff" : "#000";
+              }}
+            >
+              {opt}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function QueueManagement() {
   const [rows, setRows] = useState([]);
   const [tip, setTip] = useState(null);
+  const [returnedPopup, setReturnedPopup] = useState(null); 
+  const [teamFilter, setTeamFilter] = useState("ALL");
+  const [qualifierFilter, setQualifierFilter] = useState("");
+
 
   const [loading, setLoading] = useState(true); // initial load only
   const [refreshing, setRefreshing] = useState(false); // silent refresh
@@ -217,6 +313,7 @@ export default function QueueManagement() {
   const [popup, setPopup] = useState(null);
   const popupQueueRef = useRef([]);
   const popupTimerRef = useRef(null);
+  const returnedTimerRef = useRef(null);
 
   function enqueuePopup(item) {
     popupQueueRef.current.push(item);
@@ -242,6 +339,11 @@ export default function QueueManagement() {
       showNextPopup();
     }, POPUP_MS);
   }
+  useEffect(() => {
+  return () => {
+    if (returnedTimerRef.current) clearTimeout(returnedTimerRef.current);
+  };
+}, []);
 
   useEffect(() => {
     return () => {
@@ -249,7 +351,7 @@ export default function QueueManagement() {
     };
   }, []);
  let saleAudio;
-
+ let scoobyAudio;
 function playSaleSound() {
   try {
     if (!saleAudio) {
@@ -260,6 +362,22 @@ function playSaleSound() {
     
     saleAudio.currentTime = 0;
     saleAudio.play().catch(() => {
+      // autoplay blocked — will work after first user interaction
+    });
+  } catch (e) {
+    // fail silently
+  }
+}
+function playScoobySound() {
+  try {
+    if (!scoobyAudio) {
+      scoobyAudio = new Audio(scoobySound );
+      scoobyAudio.volume = 0.7; 
+    }
+
+    
+    scoobyAudio.currentTime = 0;
+    scoobyAudio.play().catch(() => {
       // autoplay blocked — will work after first user interaction
     });
   } catch (e) {
@@ -364,7 +482,28 @@ function playSaleSound() {
           });
         }
 
-        // store latest outcome
+        if (outcome === "Returned" ) {
+          const specialOnceKey = `${key}::Processing->Returned`;
+          if (!shownStatus.has(specialOnceKey)) {
+            shownStatus.add(specialOnceKey);
+            saveSet(SHOWN_STATUS_STORAGE_KEY, shownStatus);
+            playScoobySound();
+            setReturnedPopup({
+              name: qName,
+              team: safeStr(r.team),
+              customerId: safeStr(r.customerId),
+              time: safeStr(r.time),
+              imageUrl, 
+            });
+            
+            if (returnedTimerRef.current) clearTimeout(returnedTimerRef.current);
+            returnedTimerRef.current = setTimeout(() => {
+              setReturnedPopup(null);
+            }, 30000); 
+          }
+        }
+
+
         prevMap.set(key, outcome);
         
       }
@@ -430,45 +569,60 @@ function playSaleSound() {
       return { key, dir: "asc" };
     });
   }
+     const filteredRows = useMemo(() => {
+      const q = safeStr(qualifierFilter).toLowerCase();
+      return rows.filter((r) => {
+        const teamOk = teamFilter === "ALL" || safeStr(r.team) === teamFilter;
 
-  const sortedRows = useMemo(() => {
-    const data = [...rows];
-    const col = columns.find((c) => c.key === sort.key);
-    if (!col) return data;
+        const qualName = safeStr(r.qualifierName).toLowerCase();
+        const qualFirst = firstName(r.qualifierName).toLowerCase();
+        const qualOk = !q || qualName.includes(q) || qualFirst.includes(q);
 
-    const dirMul = sort.dir === "asc" ? 1 : -1;
+        return teamOk && qualOk;
+      });
+    }, [rows, teamFilter, qualifierFilter]);
+ 
+ 
+    const sortedRows = useMemo(() => {
+  const data = [...filteredRows];
+  const col = columns.find((c) => c.key === sort.key);
+  if (!col) return data;
 
-    data.sort((a, b) => {
-      const av = col.get(a, 0);
-      const bv = col.get(b, 0);
+  const dirMul = sort.dir === "asc" ? 1 : -1;
 
-      if (col.type === "time") {
-        const am = parseTimeToMinutes(av);
-        const bm = parseTimeToMinutes(bv);
-        if (am === null && bm === null) return 0;
-        if (am === null) return 1;
-        if (bm === null) return -1;
-        return (am - bm) * dirMul;
-      }
+  data.sort((a, b) => {
+    const av = col.get(a, 0);
+    const bv = col.get(b, 0);
 
-      if (col.type === "number") {
-        const an = safeNum(av);
-        const bn = safeNum(bv);
-        if (an === null && bn === null) return 0;
-        if (an === null) return 1;
-        if (bn === null) return -1;
-        return (an - bn) * dirMul;
-      }
+    if (col.type === "time") {
+      const am = parseTimeToMinutes(av);
+      const bm = parseTimeToMinutes(bv);
+      if (am === null && bm === null) return 0;
+      if (am === null) return 1;
+      if (bm === null) return -1;
+      return (am - bm) * dirMul;
+    }
 
-      const as = safeStr(av).toLowerCase();
-      const bs = safeStr(bv).toLowerCase();
-      if (as < bs) return -1 * dirMul;
-      if (as > bs) return 1 * dirMul;
-      return 0;
-    });
+    if (col.type === "number") {
+      const an = safeNum(av);
+      const bn = safeNum(bv);
+      if (an === null && bn === null) return 0;
+      if (an === null) return 1;
+      if (bn === null) return -1;
+      return (an - bn) * dirMul;
+    }
 
-    return data;
-  }, [rows, sort.key, sort.dir, columns]);
+    const as = safeStr(av).toLowerCase();
+    const bs = safeStr(bv).toLowerCase();
+    if (as < bs) return -1 * dirMul;
+    if (as > bs) return 1 * dirMul;
+    return 0;
+  });
+
+  return data;
+}, [filteredRows, sort.key, sort.dir, columns]);
+
+
 
   const counts = useMemo(() => {
     const total = rows.length;
@@ -487,10 +641,105 @@ function playSaleSound() {
 
     return { total, sale, processing, returned, homeOffice };
   }, [rows]);
+  const teamOptions = useMemo(() => {
+  const set = new Set();
+  for (const r of rows) {
+    const t = safeStr(r.team);
+    if (t) set.add(t);
+  }
+  return ["ALL", ...Array.from(set).sort((a, b) => a.localeCompare(b))];
+}, [rows]);
+
+const qualifierOptions = useMemo(() => {
+  const set = new Set();
+  for (const r of rows) {
+    const q = firstName(r.qualifierName);
+    if (q && q !== "-") set.add(q);
+  }
+  return Array.from(set).sort((a, b) => a.localeCompare(b));
+}, [rows]);
 
   return (
     <div style={{ minHeight: "100vh", background: "#F2F2F2", padding: 18, fontFamily: "system-ui" }}>
       {loading && <MoneyLoader text="Loading Queue..." />}
+        {returnedPopup && (
+          <div
+            style={{
+              position: "fixed",
+              inset: 0,
+              zIndex: 10000,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              background: "rgba(0,0,0,0.35)",
+              padding: 18,
+            }}
+            onClick={() => setReturnedPopup(null)}
+          >
+            <div
+              onClick={(e) => e.stopPropagation()}
+              style={{
+                width: 420,
+                maxWidth: "95vw",
+                border: "6px solid #000",
+                borderRadius: 22,
+                boxShadow: "14px 14px 0 #000",
+                background: "#FFC9C9",
+                padding: 16,
+                textAlign: "center",
+                position: "relative",
+              }}
+            >
+              {/* ❌ close */}
+              <button
+                onClick={() => setReturnedPopup(null)}
+                style={{
+                  position: "absolute",
+                  top: 8,
+                  right: 8,
+                  width: 34,
+                  height: 34,
+                  borderRadius: 12,
+                  border: "4px solid #000",
+                  background: "#fff",
+                  fontWeight: 1200,
+                  cursor: "pointer",
+                  boxShadow: "4px 4px 0 #000",
+                }}
+              >
+                ✕
+              </button>
+
+              <img
+                src={scooby}
+                alt={returnedPopup.name || "Qualifier"}
+                style={{
+                  width: 140,
+                  height: 140,
+                  borderRadius: 18,
+                  border: "5px solid #000",
+                  objectFit: "cover",
+                  background: "#fff",
+                  marginBottom: 12,
+                }}
+              />
+
+              <div style={{ fontSize: 28, fontWeight: 1300 }}>
+                Scooby Call 📞
+              </div>
+
+              <div style={{ marginTop: 6, fontSize: 22, fontWeight: 1200 }}>
+                {returnedPopup.name}
+              </div>
+
+              <div style={{ marginTop: 10, fontWeight: 1000, fontSize: 14 }}>
+                {returnedPopup.team ? `Team: ${returnedPopup.team}` : ""}{" "}
+                {returnedPopup.customerId ? `• ID: ${returnedPopup.customerId}` : ""}{" "}
+                {returnedPopup.time ? `• ${returnedPopup.time}` : ""}
+              </div>
+            </div>
+          </div>
+        )}
 
       {/* ✅ Popup (Sale + Status messages) */}
       {popup && (
@@ -580,6 +829,58 @@ function playSaleSound() {
               </div>
             </div>
           </div>
+           <div style={{ marginTop: 12, display: "flex", gap: 10, flexWrap: "wrap", alignItems: "center" }}>
+                    {/* Team dropdown */}
+                  <div>
+                    <div style={{ fontWeight: 1000, marginBottom: 6 }}>Team</div>
+
+                    <TeamDropdown
+                      value={teamFilter}
+                      options={teamOptions}
+                      onChange={setTeamFilter}
+                    />
+                  </div>
+
+
+
+                    {/* Qualifier search */}
+                    <div>
+                      <div style={{ fontWeight: 1000, marginBottom: 6 }}>Qualifier</div>
+                      <input
+                        value={qualifierFilter}
+                        onChange={(e) => setQualifierFilter(e.target.value)}
+                        placeholder="Search name..."
+                        style={{
+                          border: "4px solid #000",
+                          borderRadius: 12,
+                          padding: "8px 10px",
+                          fontWeight: 1000,
+                          boxShadow: "4px 4px 0 #000",
+                          width: 220,
+                        }}
+                      />
+                    </div>
+
+                    {/* Clear button */}
+                    <button
+                      onClick={() => {
+                        setTeamFilter("ALL");
+                        setQualifierFilter("");
+                      }}
+                      style={{
+                        marginTop: 22,
+                        border: "4px solid #000",
+                        borderRadius: 12,
+                        padding: "8px 12px",
+                        fontWeight: 1200,
+                        background: "#fff",
+                        cursor: "pointer",
+                        boxShadow: "4px 4px 0 #000",
+                      }}
+                    >
+                      Clear
+                    </button>
+                  </div>
         </SketchCard>
 
         <div style={{ marginTop: 18 }}>
@@ -613,8 +914,10 @@ function playSaleSound() {
                         );
                       })}
                     </tr>
-                  </thead>
+                   
 
+                  </thead>
+                  
                   <tbody>
                     {sortedRows.map((r, idx) => {
                       const outcome = normalizeOutcome(r.processingStage, r.closerStatus);
@@ -642,7 +945,13 @@ function playSaleSound() {
                           </td>
 
                           <td style={{ padding: 10, border: "3px solid #000" }}>
-                            <span>{r.carrier || "-"}</span>
+                            <span>
+                              {["Processing", "Returned"].includes(
+                                normalizeOutcome(r.processingStage, r.closerStatus)
+                              )
+                                ? (safeStr(r.CarrierPitch) || safeStr(r.carrier) || "-")
+                                : (safeStr(r.carrier) || "-")}
+                            </span>
                           </td>
 
                           <td style={{ padding: 10, border: "3px solid #000" }}>
@@ -676,7 +985,6 @@ function playSaleSound() {
                               {safeStr(r.Feedback) || "-"}
                             </span>
                           </td>
-
 
                           <td style={{ padding: 10, border: "3px solid #000" }}>
                             <span style={pillStyle(stageBg(outcome))}>{outcome}</span>

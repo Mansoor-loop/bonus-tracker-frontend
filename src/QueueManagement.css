@@ -20,7 +20,7 @@ frontend/src/QueueManagement.css
   }
 }
 
-@media (max-width: 1200px) {
+@media (max-width: 1280px) {
   .qm-tableScale {
     transform: scale(0.95);
   }
@@ -31,49 +31,59 @@ frontend/src/QueueManagement.css
     transform: scale(0.67);
   }
 } */
-@media (max-width: 1160px) {
+@media (max-width: 1220px) {
   .qm-tableScale {
     transform: scale(0.90);
   }
 }
-@media (max-width: 1100px) {
+@media (max-width: 1150px) {
   .qm-tableScale {
     transform: scale(0.85);
   }
 }
-@media (max-width:1050px) {
+@media (max-width:1100px) {
   .qm-tableScale {
     transform: scale(0.80);
   }
 }
+@media (max-width:1060px) {
+  .qm-tableScale {
+    transform: scale(0.75);
+  }
+}
 @media (max-width: 1000px) {
   .qm-tableScale {
-    transform: scale(0.74);
+    transform: scale(0.73);
   }
 }
 @media (max-width:950px) {
   .qm-tableScale {
-    transform: scale(0.70);
+    transform: scale(0.69);
+  }
+}
+@media (max-width:930px) {
+  .qm-tableScale {
+    transform: scale(0.67);
   }
 }
 @media (max-width: 900px) {
   .qm-tableScale {
-    transform: scale(0.66);
+    transform: scale(0.65);
   }
 }
 @media (max-width: 850px) {
   .qm-tableScale {
-    transform: scale(0.62);
+    transform: scale(0.61);
   }
 }
 @media (max-width: 790px) {
   .qm-tableScale {
-    transform: scale(0.58);
+    transform: scale(0.56);
   }
 }
 @media (max-width: 745px) {
   .qm-tableScale {
-    transform: scale(0.54);
+    transform: scale(0.53);
   }
 }
 @media (max-width: 700px) {
@@ -97,4 +107,69 @@ frontend/src/QueueManagement.css
     width: 100%;
 
   }
+}
+/* ===== Game/Sketch Select ===== */
+/* ===== Sketch / Game Style Select ===== */
+.qm-selectWrap {
+  position: relative;
+  display: inline-block;
+}
+
+/* main select */
+.qm-select {
+  -webkit-appearance: none;
+  appearance: none;
+  outline: none;
+  cursor: pointer;
+
+  background: #ffffff;
+  color: #000;
+
+  border: 5px solid #000;
+  border-radius: 18px;
+
+  padding: 10px 44px 10px 14px;
+  font-size: 18px;
+  font-weight: 1100;
+
+  box-shadow: 6px 6px 0 #000;
+  min-width: 170px;
+}
+
+/* dropdown arrow */
+.qm-selectWrap::after {
+  content: "▾";
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 16px;
+  font-weight: 1200;
+  pointer-events: none;
+}
+
+/* focus */
+.qm-select:focus {
+  box-shadow: 0 0 0 4px #000, 8px 8px 0 #000;
+}
+
+/* ===== Options ===== */
+.qm-select option {
+  background: #ffffff;
+  color: #000000;
+  font-weight: 1100;
+  padding: 10px;
+}
+
+/* hover + selected */
+.qm-select option:hover,
+.qm-select option:checked {
+  background: #000000;
+  color: #ffffff;
+}
+
+/* Firefox support */
+.qm-select option:focus {
+  background: #000000;
+  color: #ffffff;
 }
