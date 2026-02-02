@@ -1,0 +1,277 @@
+/* frontend/src/components/TopNav.css */
+
+.navWrap{
+  position: relative;
+
+  z-index: 50;
+  padding: 0 18px;
+}
+
+/* Default navbar look (non-goldrush) */
+.navBar{
+  max-width: 1200px;
+  margin: 0 auto;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap: 16px;
+
+  padding: 12px 14px;
+  border-radius: 18px;
+
+  background: #FFD400;
+  border: 5px solid #000;
+  box-shadow: 10px 10px 0 #000;
+}
+
+/* ===== Gold Rush theme only when /goldrush is active ===== */
+.navWrap.goldrush .navBar{
+  background: rgba(10, 8, 6, 0.55);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+
+  border: 1px solid rgba(255, 210, 90, 0.45);
+  box-shadow:
+    0 18px 45px rgba(0,0,0,0.45),
+    inset 0 1px 0 rgba(255,255,255,0.12);
+}
+
+/* Brand */
+.brand{
+  display:flex;
+  align-items:center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 14px;
+
+  background: rgba(255,255,255,0.92);
+  border: 4px solid #000;
+  box-shadow: 6px 6px 0 #000;
+}
+
+.brandText{
+  color: #000;
+  font-weight: 1000;
+  letter-spacing: 0.3px;
+}
+
+/* Goldrush brand */
+.navWrap.goldrush .brand{
+  background: linear-gradient(180deg, rgba(255,215,110,0.18), rgba(255,215,110,0.06));
+  border: 1px solid rgba(255, 210, 90, 0.35);
+  box-shadow: none;
+}
+.navWrap.goldrush .brandText{ color: #fff; }
+
+/* Links */
+.navLinks{
+  display:flex;
+  align-items:center;
+  gap: 10px;
+}
+
+.navBtn{
+  color: #000;
+  text-decoration:none;
+  font-weight: 1000;
+
+  letter-spacing: 0.2px;
+
+  padding: 10px 14px;
+  border-radius: 14px;
+
+  background: #fff;
+  border: 4px solid #000;
+  box-shadow: 6px 6px 0 #000;
+  transition: transform .15s ease, background .15s ease, color .15s ease;
+}
+
+/* hover: white -> black, text white (your request) */
+.navBtn:hover{
+  transform: translateY(-1px);
+  background: #000;
+  color: #fff;
+}
+
+/* Active */
+.navBtn.active{
+  background: #FFFBB1;
+  color: #000;
+}
+
+/* Admin */
+.navBtn.admin{
+  background: #FF4D4D;
+  color: #000;
+}
+.navBtn.admin:hover{
+  background: #000;
+  color: #fff;
+}
+
+/* Goldrush link look */
+.navWrap.goldrush .navBtn{
+  color: rgba(255,255,255,0.92);
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.10);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.10);
+}
+.navWrap.goldrush .navBtn:hover{
+  transform: translateY(-1px);
+  background: rgba(255,255,255,0.10);
+  color: #fff;
+  border-color: rgba(255, 210, 90, 0.35);
+  box-shadow:
+    0 10px 25px rgba(0,0,0,0.35),
+    inset 0 1px 0 rgba(255,255,255,0.14);
+}
+
+/* Goldrush active tab = gold highlight */
+.navWrap.goldrush .navBtn.active{
+  color: #1a1206;
+  background: linear-gradient(180deg, #FFD36A, #FFB84A);
+  border-color: rgba(255, 210, 90, 0.9);
+  box-shadow:
+    0 12px 28px rgba(0,0,0,0.45),
+    inset 0 1px 0 rgba(255,255,255,0.35);
+}
+
+/* Burger */
+.burger{
+  display:none;
+  width: 44px; height: 44px;
+  border-radius: 14px;
+  background: #fff;
+  border: 4px solid #000;
+  cursor:pointer;
+  align-items:center;
+  justify-content:center;
+  gap: 5px;
+  padding: 0;
+  box-shadow: 6px 6px 0 #000;
+}
+.burger span{
+  display:block;
+  width: 18px;
+  height: 2px;
+  background: #000;
+  border-radius: 999px;
+}
+
+/* Goldrush burger */
+.navWrap.goldrush .burger{
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255, 210, 90, 0.35);
+  box-shadow: none;
+}
+.navWrap.goldrush .burger span{
+  background: rgba(255,255,255,0.9);
+}
+
+/* Responsive menu */
+@media (max-width: 900px){
+  .burger{ display:flex; }
+
+  .navLinks{
+    position: fixed;
+    left: 18px;
+    right: 18px;
+    top: 86px;
+    display: none;
+    flex-direction: column;
+    gap: 10px;
+
+    padding: 14px;
+    border-radius: 18px;
+
+    background: #FFD400;
+    border: 5px solid #000;
+    box-shadow: 10px 10px 0 #000;
+  }
+
+  body.menu-open .navLinks{ display:flex; }
+  .navBtn{ width: 100%; text-align:center; }
+
+  /* Goldrush dropdown */
+  .navWrap.goldrush .navLinks{
+    background: rgba(10, 8, 6, 0.72);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 210, 90, 0.35);
+    box-shadow: 0 18px 45px rgba(0,0,0,0.55);
+  }
+}
+
+
+/* =========================
+   Gold Rush Animations
+========================= */
+
+@keyframes goldPulse {
+  0%   { box-shadow: 0 0 0 rgba(255,215,110,0), 0 0 0 rgba(255,184,74,0); }
+  50%  { box-shadow: 0 0 18px rgba(255,215,110,0.55), 0 0 35px rgba(255,184,74,0.35); }
+  100% { box-shadow: 0 0 0 rgba(255,215,110,0), 0 0 0 rgba(255,184,74,0); }
+}
+
+@keyframes shimmerSweep {
+  0%   { transform: translateX(-140%) rotate(18deg); opacity: 0; }
+  10%  { opacity: 0.9; }
+  50%  { opacity: 1; }
+  90%  { opacity: 0.9; }
+  100% { transform: translateX(140%) rotate(18deg); opacity: 0; }
+}
+
+/* navbar subtle pulsing trim */
+.navWrap.goldrush .navBar{
+  position: relative;
+  transition: background 260ms ease, border-color 260ms ease, box-shadow 260ms ease, transform 260ms ease;
+  animation: goldPulse 2.2s ease-in-out infinite;
+}
+
+/* Active tab = glowing + pulsing */
+.navWrap.goldrush .navBtn.active{
+  position: relative;
+  animation: goldPulse 1.8s ease-in-out infinite;
+}
+
+/* Crown shimmer */
+.navWrap.goldrush .brandIcon{
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transform: translateZ(0);
+}
+
+/* the shimmer stripe */
+.navWrap.goldrush .brandIcon::after{
+  content: "";
+  position: absolute;
+  inset: -6px -10px;
+  background: linear-gradient(
+    90deg,
+    rgba(255,255,255,0) 0%,
+    rgba(255,255,255,0.9) 45%,
+    rgba(255,255,255,0) 70%
+  );
+  filter: blur(0.2px);
+  opacity: 0;
+  pointer-events: none;
+  animation: shimmerSweep 2.8s ease-in-out infinite;
+}
+
+/* little sparkle feel */
+.navWrap.goldrush .brandIcon{
+  text-shadow: 0 0 10px rgba(255,215,110,0.6);
+}
+
+/* Respect reduced motion */
+@media (prefers-reduced-motion: reduce){
+  .navWrap.goldrush .navBar,
+  .navWrap.goldrush .navBtn.active,
+  .navWrap.goldrush .brandIcon::after{
+    animation: none !important;
+  }
+}
+.navBar{
+  transition: background 260ms ease, border-color 260ms ease, box-shadow 260ms ease, filter 260ms ease;
+}

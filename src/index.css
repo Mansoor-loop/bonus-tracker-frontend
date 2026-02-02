@@ -12,6 +12,15 @@ body {
   background-attachment: fixed;
 }
 
+
+body.goldrush-page {
+  background: #ffffff; /* pure white */
+  background-image: url("./assests/background/rules.png");
+  background-repeat: no-repeat;
+  background-position: center center;
+  background-size: cover;          /* ✅ fills entire screen */
+  
+}
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;

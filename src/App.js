@@ -5,6 +5,8 @@ import AdminBonus from "./pages/AdminBonus";
 import TopNav from "./components/TopNav";
 import TopGuns from "./pages/TopGuns";
 import QueueManagement from "./pages/QueueManagement";
+import GoldRush from "./pages/GoldRush";
+
 
 export default function App() {
   return (
@@ -12,12 +14,15 @@ export default function App() {
       <div style={{ minHeight: "100vh", padding: 18, fontFamily: "system-ui" }}>
         <div style={{ maxWidth: 1400, margin: "0 auto" }}>
           <TopNav />
+
           <Routes>
             <Route path="/" element={<Dashboard />} />           
             <Route path="/top-guns" element={<TopGuns />} />
             <Route path="/admin" element={<AdminBonus />} />
             <Route path="/queue" element={<QueueManagement />} />
+             <Route path="/goldrush" element={<GoldRush />} />
           </Routes>
+
         </div>
       </div>
     </BrowserRouter>

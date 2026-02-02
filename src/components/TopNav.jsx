@@ -1,71 +1,83 @@
-import React from "react";
+// frontend/src/components/TopNav.jsx
+import React, { useEffect, useMemo, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-
-function NavButton({ to, label, active, bg }) {
-  return (
-    <Link
-      to={to}
-      style={{
-        textDecoration: "none",
-        display: "inline-block",
-        border: "4px solid #000",
-        borderRadius: 10,
-        padding: "10px 14px",
-        fontWeight: 1000,
-        boxShadow: "6px 6px 0 #000",
-        background: active ? (bg || "#FF4D4D") : "#fff",
-        color: "#000",
-        minWidth: 120,
-        textAlign: "center",
-      }}
-    >
-      {label}
-    </Link>
-  );
-}
+import "./TopNav.css";
 
 export default function TopNav() {
   const loc = useLocation();
+  const [menuOpen, setMenuOpen] = useState(false);
 
-  // ✅ support both "/" and "/dashboard" as dashboard route
-  const isDashboard =
-    loc.pathname === "/" || loc.pathname.startsWith("/dashboard");
-
-  const isTopGuns = loc.pathname.startsWith("/top-guns");
-  const isAdmin = loc.pathname.startsWith("/admin");
-  const isQueue = loc.pathname.startsWith("/queue");
   const isGoldRush = loc.pathname.startsWith("/goldrush");
-  return (
-    <div
-      style={{
-        background: "#FFD400",
-        border: "5px solid #000",
-        borderRadius: 18,
-        boxShadow: "10px 10px 0 #000",
-        padding: "10px 14px",
-        marginBottom: 16,
-      }}
-    >
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          gap: 12,
-        }}
-      >
-        {/* Left brand */}
-        <NavButton to="/" label="BONUS TRACKER" active={isDashboard} bg="#FFFFFF" />
 
-        {/* Right buttons */}
-        <div style={{ display: "flex", gap: 10 }}>
-          <NavButton to="/" label="DASHBOARD" active={isDashboard} bg="#FFFBB1" />
-          {/* <NavButton to="/goldrush" label="GOLD RUSH" active={isGoldRush} bg="#FFFBB1" /> */}
-          <NavButton to="/top-guns" label="TOP GUNS" active={isTopGuns} bg="#FFFBB1" />
-          <NavButton to="/queue" label="QUEUE" active={isQueue} bg="#FFFBB1" />
-          <NavButton to="/admin" label="ADMIN LOGIN" active={isAdmin} bg="#FF4D4D" />
+  // Close menu when route changes
+  useEffect(() => {
+    setMenuOpen(false);
+  }, [loc.pathname]);
+
+  // Toggle body class for mobile menu + goldrush page theme
+  useEffect(() => {
+    document.body.classList.toggle("menu-open", menuOpen);
+
+    // if you already use body.goldrush-page for background:
+    document.body.classList.toggle("goldrush-page", isGoldRush);
+
+    return () => {
+      document.body.classList.remove("menu-open");
+      document.body.classList.remove("goldrush-page");
+    };
+  }, [menuOpen, isGoldRush]);
+
+  const links = useMemo(
+    () => [
+      { to: "/goldrush", label: "GOLD RUSH" },
+      { to: "/top-guns", label: "TOP GUNS" },
+      { to: "/queue", label: "QUEUE" },
+      { to: "/admin", label: "ADMIN LOGIN", admin: true },
+    ],
+    []
+  );
+
+  // treat "/" same as dashboard if you want
+  const isDashboard = loc.pathname === "/" || loc.pathname.startsWith("/dashboard");
+
+  function isActive(to) {
+    if (to === "/dashboard") return isDashboard;
+    return loc.pathname.startsWith(to);
+  }
+
+  return (
+    <header className={`navWrap ${isGoldRush ? "goldrush" : ""}`}>
+      <nav className="navBar">
+        <Link to="/" className="brand" style={{ textDecoration: "none" }}>
+          <span className="brandText">DASHBOARD</span>
+        </Link>
+
+        <button
+          className="burger"
+          aria-label="Open menu"
+          onClick={() => setMenuOpen((v) => !v)}
+          type="button"
+        >
+          <span></span><span></span><span></span>
+        </button>
+
+        <div className="navLinks">
+          {links.map((l) => (
+            <Link
+              key={l.to}
+              to={l.to}
+              className={[
+                "navBtn",
+                isActive(l.to) ? "active" : "",
+                l.admin ? "admin" : "",
+              ].join(" ")}
+              onClick={() => setMenuOpen(false)}
+            >
+              {l.label}
+            </Link>
+          ))}
         </div>
-      </div>
-    </div>
+      </nav>
+    </header>
   );
 }

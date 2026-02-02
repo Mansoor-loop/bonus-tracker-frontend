@@ -1,0 +1,223 @@
+/* frontend/src/components/TopNavGold.css */
+
+/* Smooth theme fade when switching pages */
+body {
+  transition: background-color 280ms ease, color 280ms ease;
+}
+
+/* Sticky wrapper */
+.goldNavWrap{
+  position: sticky;
+  top: 14px;
+  z-index: 999;
+  padding: 0 18px;
+}
+
+/* Main capsule bar */
+.goldNav{
+  max-width: 1180px;
+  margin: 0 auto;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+
+  padding: 10px 14px;
+
+  border-radius: 999px;
+  border: 2px solid rgba(255, 210, 90, 0.55);
+
+  /* Dark glossy base like screenshot */
+  background: radial-gradient(120% 160% at 20% 30%,
+      rgba(255, 200, 80, 0.10) 0%,
+      rgba(0, 0, 0, 0.65) 55%,
+      rgba(0, 0, 0, 0.90) 100%);
+
+  /* Outer glow + "tube" look */
+  box-shadow:
+    0 18px 40px rgba(0,0,0,0.55),
+    0 0 0 3px rgba(255, 190, 60, 0.10),
+    0 0 35px rgba(255, 180, 60, 0.25),
+    inset 0 1px 0 rgba(255,255,255,0.10),
+    inset 0 -10px 18px rgba(0,0,0,0.55);
+
+  position: relative;
+  overflow: hidden;
+}
+
+/* Animated gold glow pulse */
+.goldNav::after{
+  content:"";
+  position:absolute;
+  inset:-2px;
+  border-radius:999px;
+  pointer-events:none;
+  box-shadow: 0 0 40px rgba(255, 190, 70, 0.28);
+  opacity: 0.75;
+  animation: goldPulse 2.6s ease-in-out infinite;
+}
+@keyframes goldPulse{
+  0%,100%{ opacity: 0.55; filter: blur(0px); }
+  50%{ opacity: 1; filter: blur(0.2px); }
+}
+
+/* Brand */
+.goldBrand{
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+
+  text-decoration: none;
+  color: #ffe7b0;
+
+  padding: 10px 14px;
+  border-radius: 999px;
+
+  background: linear-gradient(180deg,
+    rgba(255, 205, 95, 0.22),
+    rgba(255, 205, 95, 0.06)
+  );
+
+  border: 1px solid rgba(255, 210, 90, 0.40);
+  box-shadow:
+    0 10px 25px rgba(0,0,0,0.40),
+    inset 0 1px 0 rgba(255,255,255,0.12);
+}
+
+/* Crown shimmer */
+.goldCrown{
+  display:inline-block;
+  filter: drop-shadow(0 0 10px rgba(255, 210, 90, 0.45));
+  animation: crownShimmer 1.8s ease-in-out infinite;
+}
+@keyframes crownShimmer{
+  0%,100%{ transform: translateY(0); filter: drop-shadow(0 0 9px rgba(255, 210, 90, 0.35)); }
+  50%{ transform: translateY(-1px); filter: drop-shadow(0 0 16px rgba(255, 220, 120, 0.75)); }
+}
+
+.goldBrandText{
+  font-weight: 1000;
+  letter-spacing: 0.2px;
+  font-size: 16px; /* keep close to your previous sizing */
+}
+
+/* Links row */
+.goldLinks{
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Pills */
+.goldBtn{
+  text-decoration: none;
+  color: rgba(255,255,255,0.92);
+
+  font-weight: 1000;
+  font-size: 14px;
+
+  padding: 10px 16px;
+  border-radius: 16px;
+
+  border: 1px solid rgba(255, 210, 90, 0.30);
+
+  background: linear-gradient(180deg,
+    rgba(255,255,255,0.06),
+    rgba(255,255,255,0.02)
+  );
+
+  box-shadow:
+    0 10px 22px rgba(0,0,0,0.35),
+    inset 0 1px 0 rgba(255,255,255,0.10);
+
+  transition: transform .14s ease, box-shadow .14s ease, border-color .14s ease, background .14s ease;
+}
+
+.goldBtn:hover{
+  transform: translateY(-1px);
+  border-color: rgba(255, 210, 90, 0.55);
+  box-shadow:
+    0 14px 28px rgba(0,0,0,0.45),
+    0 0 18px rgba(255, 190, 70, 0.18),
+    inset 0 1px 0 rgba(255,255,255,0.12);
+}
+
+/* Active = bright gold like screenshot */
+.goldBtn.active{
+  color: #1a1206;
+  border-color: rgba(255, 215, 120, 0.9);
+
+  background: linear-gradient(180deg, #FFD36A, #FFB84A);
+  box-shadow:
+    0 16px 30px rgba(0,0,0,0.50),
+    0 0 28px rgba(255, 200, 90, 0.35),
+    inset 0 1px 0 rgba(255,255,255,0.30);
+}
+
+/* Admin slightly different */
+.goldBtn.admin{
+  border-color: rgba(255, 150, 150, 0.35);
+  background: linear-gradient(180deg, rgba(255,90,90,0.10), rgba(255,90,90,0.05));
+}
+
+/* Burger */
+.goldBurger{
+  width: 46px;
+  height: 46px;
+  border-radius: 16px;
+
+  background: linear-gradient(180deg,
+    rgba(255,255,255,0.06),
+    rgba(255,255,255,0.02)
+  );
+
+  border: 1px solid rgba(255, 210, 90, 0.35);
+  box-shadow:
+    0 10px 22px rgba(0,0,0,0.35),
+    inset 0 1px 0 rgba(255,255,255,0.10);
+
+  cursor: pointer;
+
+  display: none;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 0;
+}
+.goldBurger span{
+  display:block;
+  width: 18px;
+  height: 2px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.92);
+}
+
+/* Responsive mobile menu */
+@media (max-width: 920px){
+  .goldBurger{ display:flex; }
+
+  .goldLinks{
+    position: fixed;
+    left: 18px;
+    right: 18px;
+    top: 84px;
+
+    display: none;
+    flex-direction: column;
+    gap: 10px;
+
+    padding: 14px;
+    border-radius: 22px;
+
+    background: rgba(0,0,0,0.72);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+
+    border: 1px solid rgba(255, 210, 90, 0.35);
+    box-shadow: 0 20px 45px rgba(0,0,0,0.60);
+  }
+
+  .goldLinks.show{ display:flex; }
+  .goldBtn{ width: 100%; text-align: center; }
+}

@@ -660,7 +660,7 @@ const qualifierOptions = useMemo(() => {
 }, [rows]);
 
   return (
-    <div style={{ minHeight: "100vh", background: "#F2F2F2", padding: 18, fontFamily: "system-ui" }}>
+    <div style={{ minHeight: "100vh", background: "transparent", padding: 18, fontFamily: "system-ui" }}>
       {loading && <MoneyLoader text="Loading Queue..." />}
         {returnedPopup && (
           <div
