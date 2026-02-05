@@ -42,7 +42,7 @@ import rookie5 from "../assests/agents/shadow.png";
 /* =========================
    HELPERS
 ========================= */
-const AUTO_REFRESH_MS = 3 * 60 * 1000; // ✅ 3 mins
+const AUTO_REFRESH_MS = 3 * 60 * 1000;
 
 function fmtUSD0(n) {
   const x = Number(n || 0);
@@ -55,10 +55,57 @@ function normalizeName(name) {
 
 function getISOWeekNumber(date = new Date()) {
   const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
-  const dayNum = d.getUTCDay() || 7; // Sunday=7
+  const dayNum = d.getUTCDay() || 7;
   d.setUTCDate(d.getUTCDate() + 4 - dayNum);
   const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
   return Math.ceil(((d - yearStart) / 86400000 + 1) / 7);
+}
+
+/* =========================
+   ✅ MANUAL ADJUSTMENTS
+   Adds missing sales/AP on top of backend data every refresh
+========================= */
+const MANUAL_FIXES = [
+  { qualifierKey: "KEVIN GONCALVES", addSales: 1, addAp: 816 },
+  { qualifierKey: "MOZELL HARDY", addSales: 1, addAp: 1294 },
+  { qualifierKey: "STEPHANIE SANTIAGO", addSales: 1, addAp: 1272 },
+];
+
+function applyManualFixes(rawRows = []) {
+  const rows = Array.isArray(rawRows) ? [...rawRows] : [];
+  const idxByKey = new Map();
+
+  // map existing rows
+  for (let i = 0; i < rows.length; i++) {
+    const key = normalizeName(rows[i]?.qualifier);
+    if (key) idxByKey.set(key, i);
+  }
+
+  for (const fix of MANUAL_FIXES) {
+    const key = normalizeName(fix.qualifierKey);
+    const idx = idxByKey.get(key);
+
+    if (idx === undefined) {
+      // if backend didn't return the person, create a row so tiers still show correct stats
+      rows.push({
+        qualifier: fix.qualifierKey,
+        apSum: Number(fix.addAp || 0),
+        salesCount: Number(fix.addSales || 0),
+      });
+      idxByKey.set(key, rows.length - 1);
+      continue;
+    }
+
+    const r = rows[idx] || {};
+    rows[idx] = {
+      ...r,
+      qualifier: r.qualifier || fix.qualifierKey,
+      apSum: Number(r.apSum || 0) + Number(fix.addAp || 0),
+      salesCount: Number(r.salesCount || 0) + Number(fix.addSales || 0),
+    };
+  }
+
+  return rows;
 }
 
 /* =========================
@@ -127,8 +174,6 @@ const IMAGE_MAP = {
 
 /* =========================
    BUILD TIER LISTS (ALWAYS SHOW CARDS)
-   - We build from TIER_MAP (fixed roster)
-   - Then merge stats from API rows (ap/sales)
 ========================= */
 function buildTierRankAlwaysShow(rows, tierName, limit) {
   const stats = new Map();
@@ -145,7 +190,6 @@ function buildTierRankAlwaysShow(rows, tierName, limit) {
     });
   }
 
-  // take the fixed roster for this tier
   const roster = Object.keys(TIER_MAP).filter((k) => TIER_MAP[k] === tierName);
 
   const items = roster.map((key) => {
@@ -159,7 +203,6 @@ function buildTierRankAlwaysShow(rows, tierName, limit) {
     };
   });
 
-  // rank inside tier by AP (even if all 0)
   items.sort((a, b) => b.ap - a.ap);
 
   const sliced = typeof limit === "number" ? items.slice(0, limit) : items;
@@ -224,11 +267,10 @@ function TierSection({
 ========================= */
 export default function GoldRush() {
   const [rows, setRows] = useState([]);
-  const [loading, setLoading] = useState(true);        // initial load only
-  const [refreshing, setRefreshing] = useState(false); // seamless refresh state
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [err, setErr] = useState("");
 
-  // 🔊 toggle sound
   const [soundEnabled, setSoundEnabled] = useState(false);
   const audioRef = useRef(null);
 
@@ -272,7 +314,10 @@ export default function GoldRush() {
     setErr("");
     try {
       const res = await fetchFeSummary({ range: "week", team: "ALL" });
-      setRows(res?.rows || []);
+
+      // ✅ apply manual adjustments every time
+      const fixedRows = applyManualFixes(res?.rows || []);
+      setRows(fixedRows);
     } catch (e) {
       setErr(e?.message || String(e));
     } finally {
@@ -289,13 +334,11 @@ export default function GoldRush() {
     };
   }, []);
 
-  // initial load
   useEffect(() => {
     load({ silent: false });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // ✅ auto refresh every 3 mins (no loader)
   useEffect(() => {
     const id = setInterval(() => {
       if (!refreshing) load({ silent: true });
@@ -305,7 +348,6 @@ export default function GoldRush() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [refreshing]);
 
-  // ✅ ALWAYS show cards, even if rows empty
   const goldTier = useMemo(() => buildTierRankAlwaysShow(rows, "GOLD", 5), [rows]);
   const silverTier = useMemo(() => buildTierRankAlwaysShow(rows, "SILVER", 5), [rows]);
   const bronzeTier = useMemo(() => buildTierRankAlwaysShow(rows, "BRONZE", 6), [rows]);
@@ -315,7 +357,6 @@ export default function GoldRush() {
     <div className="goldrush-wrapper">
       {loading && <MoneyLoader text="Loading tiers..." />}
 
-      {/* Poster */}
       <section className="poster-section">
         <div className="poster-overlay" />
         <div className="poster-card">
@@ -328,7 +369,6 @@ export default function GoldRush() {
             The player with the highest AP for the week wins the cash prize
           </p>
 
-          {/* ✅ Center aligned sound button + status */}
           <div
             style={{
               marginTop: 12,
@@ -340,16 +380,11 @@ export default function GoldRush() {
               width: "100%",
             }}
           >
-            <button
-              onClick={toggleSound}
-              className={`goldrush-sound-btn ${soundEnabled ? "on" : ""}`}
-            >
+            <button onClick={toggleSound} className={`goldrush-sound-btn ${soundEnabled ? "on" : ""}`}>
               {soundEnabled ? "SOUND ON 🔊" : "ENABLE SOUND"}
             </button>
 
-            <div style={{ fontWeight: 900 }}>
-              {refreshing ? "Updating…" : "Live"}
-            </div>
+            <div style={{ fontWeight: 900 }}>Week {weekNo} • {refreshing ? "Updating…" : "Live"}</div>
           </div>
 
           {err && (
@@ -360,7 +395,6 @@ export default function GoldRush() {
         </div>
       </section>
 
-      {/* GOLD */}
       <TierSection
         tier={goldTier}
         title="GOLD TIER"
@@ -377,7 +411,6 @@ export default function GoldRush() {
         statsClass="gold-stats"
       />
 
-      {/* SILVER */}
       <TierSection
         tier={silverTier}
         title="SILVER TIER"
@@ -394,7 +427,6 @@ export default function GoldRush() {
         statsClass="silver-stats"
       />
 
-      {/* BRONZE */}
       <TierSection
         tier={bronzeTier}
         title="BRONZE TIER"
@@ -411,7 +443,6 @@ export default function GoldRush() {
         statsClass="silver-stats"
       />
 
-      {/* ROOKIE */}
       <TierSection
         tier={rookieTier}
         title="ROOKIE TIER"
