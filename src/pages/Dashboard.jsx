@@ -1,10 +1,11 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { fetchBonusRange } from "../api/bonus";
+// import { fetchBonusRange } from "../api/bonus";
 import { fetchFeAgents, fetchFeSummary, refreshBackend } from "../api/summary";
 import MoneyLoader from "../components/MoneyLoader";
 
 const TEAMS = ["ALL", "Legends", "Maserati", "Falcons", "Sharks"];
 const AUTO_REFRESH_MS = 10 * 60 * 1000;
+
 function fmtUSD0(n) {
   const x = Number(n || 0);
   return "$" + Math.round(x).toLocaleString();
@@ -72,7 +73,10 @@ export default function Dashboard() {
   const [err, setErr] = useState("");
   const [lastRefreshedAt, setLastRefreshedAt] = useState(null);
 
-  const [feAgents, setFeAgents] = useState({ totalRecords: 0, teamBreakdown: {} });
+  const [feAgents, setFeAgents] = useState({
+    totalRecords: 0,
+    teamBreakdown: {},
+  });
   const [summaryRows, setSummaryRows] = useState([]);
   const inFlightRef = React.useRef(false);
 
@@ -84,7 +88,7 @@ export default function Dashboard() {
     background: "#fff",
   };
 
-  // compute bonus range (today/week/custom)
+  // compute range (today/week/custom)
   const effectiveRange = useMemo(() => {
     if (range === "today") {
       const d = todayISO();
@@ -109,10 +113,11 @@ export default function Dashboard() {
     [summaryRows]
   );
 
-  const totalBonus = useMemo(
-    () => summaryRows.reduce((s, r) => s + Number(r.bonus || 0), 0),
-    [summaryRows]
-  );
+  // BONUS: commented out all bonus aggregation
+  // const totalBonus = useMemo(
+  //   () => summaryRows.reduce((s, r) => s + Number(r.bonus || 0), 0),
+  //   [summaryRows]
+  // );
 
   async function loadAll() {
     if (!canFetchCustom) return;
@@ -120,20 +125,37 @@ export default function Dashboard() {
     setLoading(true);
     setErr("");
     try {
-      // 1) pull FE agents + FE summary
-      // 2) pull bonus range and merge into summary rows
-      const [agents, summary, bonus] = await Promise.all([
-        fetchFeAgents({ range, team, startDate: effectiveRange.start_date, endDate: effectiveRange.end_date }),
-        fetchFeSummary({ range, team, startDate: effectiveRange.start_date, endDate: effectiveRange.end_date }),
-        fetchBonusRange({ start_date: effectiveRange.start_date, end_date: effectiveRange.end_date, team }),
+      // Pull FE agents + FE summary
+      const [agents, summary] = await Promise.all([
+        fetchFeAgents({
+          range,
+          team,
+          startDate: effectiveRange.start_date,
+          endDate: effectiveRange.end_date,
+        }),
+        fetchFeSummary({
+          range,
+          team,
+          startDate: effectiveRange.start_date,
+          endDate: effectiveRange.end_date,
+        }),
+        // BONUS: bonus range fetch commented
+        // fetchBonusRange({
+        //   start_date: effectiveRange.start_date,
+        //   end_date: effectiveRange.end_date,
+        //   team,
+        // }),
       ]);
 
-      const bonusMap = bonus?.bonusByQualifier || {};
+      // BONUS: commented out bonus mapping + merge
+      // const bonusMap = bonus?.bonusByQualifier || {};
+      // const rows = (summary.rows || []).map((r) => {
+      //   const b = Number(bonusMap[r.qualifier] || 0);
+      //   return { ...r, bonus: b };
+      // });
 
-      const rows = (summary.rows || []).map((r) => {
-        const b = Number(bonusMap[r.qualifier] || 0);
-        return { ...r, bonus: b };
-      });
+      // Keep summary rows as-is (no bonus merge)
+      const rows = summary?.rows || [];
 
       setFeAgents(agents);
       setSummaryRows(rows);
@@ -144,29 +166,29 @@ export default function Dashboard() {
       setLoading(false);
     }
   }
- useEffect(() => {
-  loadAll();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-}, [range, team, effectiveRange.start_date, effectiveRange.end_date]);
 
-useEffect(() => {
-  // only auto-refresh for today/week (not custom)
-  if (range === "custom") return;
+  useEffect(() => {
+    loadAll();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [range, team, effectiveRange.start_date, effectiveRange.end_date]);
 
-  const id = setInterval(async () => {
-    if (inFlightRef.current) return;
-    inFlightRef.current = true;
-    try {
-      await loadAll();
-    } finally {
-      inFlightRef.current = false;
-    }
-  }, AUTO_REFRESH_MS);
+  useEffect(() => {
+    // only auto-refresh for today/week (not custom)
+    if (range === "custom") return;
 
-  return () => clearInterval(id);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-}, [range, team]);
+    const id = setInterval(async () => {
+      if (inFlightRef.current) return;
+      inFlightRef.current = true;
+      try {
+        await loadAll();
+      } finally {
+        inFlightRef.current = false;
+      }
+    }, AUTO_REFRESH_MS);
 
+    return () => clearInterval(id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [range, team]);
 
   async function handleManualRefresh() {
     setLoading(true);
@@ -184,42 +206,60 @@ useEffect(() => {
   }
 
   const topRows = useMemo(() => summaryRows.slice(0, 25), [summaryRows]);
- const MEDALS = {
-  1: "https://cdn-icons-png.flaticon.com/128/13461/13461118.png", // Gold
-  2: "https://cdn-icons-png.flaticon.com/128/13461/13461115.png", // Silver
-  3: "https://cdn-icons-png.flaticon.com/128/13461/13461099.png", // Bronze
-};
 
-function RankCell({ idx }) {
-  const rank = idx + 1;
-  const medal = MEDALS[rank];
+  const MEDALS = {
+    1: "https://cdn-icons-png.flaticon.com/128/13461/13461118.png", // Gold
+    2: "https://cdn-icons-png.flaticon.com/128/13461/13461115.png", // Silver
+    3: "https://cdn-icons-png.flaticon.com/128/13461/13461099.png", // Bronze
+  };
 
-  if (medal) {
-    return (
-      <img
-        src={medal}
-        alt={`Rank ${rank}`}
-        style={{
-          width: 25,
-          height: 26,
-          display: "block",
-        }}
-      />
-    );
+  function RankCell({ idx }) {
+    const rank = idx + 1;
+    const medal = MEDALS[rank];
+
+    if (medal) {
+      return (
+        <img
+          src={medal}
+          alt={`Rank ${rank}`}
+          style={{
+            width: 25,
+            height: 26,
+            display: "block",
+          }}
+        />
+      );
+    }
+
+    return <span style={{ fontWeight: 1200 }}>{rank}</span>;
   }
 
-  return <span style={{ fontWeight: 1200 }}>{rank}</span>;
-}
-
-
   return (
-    <div style={{ minHeight: "100vh", background: "transparent", padding: 18, fontFamily: "system-ui" }}>
-      {loading && <MoneyLoader text={range === "custom" ? "Loading custom range..." : "Loading dashboard..."} />}
+    <div
+      style={{
+        minHeight: "100vh",
+        background: "transparent",
+        padding: 18,
+        fontFamily: "system-ui",
+      }}
+    >
+      {loading && (
+        <MoneyLoader
+          text={range === "custom" ? "Loading custom range..." : "Loading dashboard..."}
+        />
+      )}
 
       <div style={{ maxWidth: 1100, margin: "0 auto" }}>
         {/* HEADER */}
         <SketchCard bg="#FFD400">
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12 }}>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              gap: 12,
+            }}
+          >
             <div>
               <div style={{ fontSize: 28, fontWeight: 1100 }}>BONUS TRACKER</div>
               <div style={{ fontWeight: 900 }}>Today / Weekly / Custom • FE only</div>
@@ -244,7 +284,9 @@ function RankCell({ idx }) {
               </button>
 
               <div style={{ marginTop: 8, fontWeight: 900 }}>
-                {lastRefreshedAt ? `Last refreshed: ${new Date(lastRefreshedAt).toLocaleTimeString()}` : "Not refreshed yet"}
+                {lastRefreshedAt
+                  ? `Last refreshed: ${new Date(lastRefreshedAt).toLocaleTimeString()}`
+                  : "Not refreshed yet"}
               </div>
             </div>
           </div>
@@ -340,7 +382,8 @@ function RankCell({ idx }) {
             <div style={{ marginTop: 14 }}>
               <SketchCard bg="#22C55E">
                 <div style={{ fontWeight: 1100 }}>TOTAL BONUS ({range.toUpperCase()})</div>
-                <div style={{ fontSize: 40, fontWeight: 1200 }}>{fmtUSD0(totalBonus)}</div>
+                {/* BONUS: total bonus display commented */}
+                {/* <div style={{ fontSize: 40, fontWeight: 1200 }}>{fmtUSD0(totalBonus)}</div> */}
               </SketchCard>
             </div>
           </div>
@@ -399,33 +442,35 @@ function RankCell({ idx }) {
 
                 <tbody>
                   {topRows.map((r, idx) => (
-                    <tr
-                      key={`${r.qualifier}-${idx}`}
-                      style={{ borderBottom: "3px solid #000" }}
-                    >
+                    <tr key={`${r.qualifier}-${idx}`} style={{ borderBottom: "3px solid #000" }}>
                       <td style={{ padding: 10, fontWeight: 1000, border: "3px solid #000" }}>
-                          <div
-                            style={{
-                              display: "flex",
-                              alignItems: "center",
-                              justifyContent: "center",
-                              height: "100%",
-                            }}
-                          >
-                            <RankCell idx={idx} />
-                          </div>
+                        <div
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            height: "100%",
+                          }}
+                        >
+                          <RankCell idx={idx} />
+                        </div>
                       </td>
+
                       <td style={{ padding: 10, fontWeight: 1000, border: "3px solid #000" }}>
                         {r.qualifier}
                       </td>
+
                       <td style={{ padding: 10, fontWeight: 1000, border: "3px solid #000" }}>
                         {Number(r.salesCount || 0)}
                       </td>
+
                       <td style={{ padding: 10, fontWeight: 1200, border: "3px solid #000" }}>
                         {fmtUSD0(r.apSum)}
                       </td>
+
+                      {/* BONUS: per-row bonus cell commented */}
                       <td style={{ padding: 10, fontWeight: 1200, border: "3px solid #000" }}>
-                        {fmtUSD0(r.bonus)}
+                        {/* {fmtUSD0(r.bonus)} */}
                       </td>
                     </tr>
                   ))}

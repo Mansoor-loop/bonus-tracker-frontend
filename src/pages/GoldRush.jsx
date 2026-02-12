@@ -66,9 +66,7 @@ function getISOWeekNumber(date = new Date()) {
    Adds missing sales/AP on top of backend data every refresh
 ========================= */
 const MANUAL_FIXES = [
-  { qualifierKey: "KEVIN GONCALVES", addSales: 1, addAp: 816 },
-  { qualifierKey: "MOZELL HARDY", addSales: 1, addAp: 1294 },
-  { qualifierKey: "STEPHANIE SANTIAGO", addSales: 1, addAp: 1272 },
+  
 ];
 
 function applyManualFixes(rawRows = []) {

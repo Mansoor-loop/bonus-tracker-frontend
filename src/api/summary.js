@@ -48,5 +48,5 @@ export async function fetchFeSummary({ range, team, startDate, endDate }) {
 export async function refreshBackend(range) {
   // only valid for today/week unless you build refresh/range on backend
   const path = range === "today" ? "/api/refresh/today" : "/api/refresh/week";
-  return apiFetch(path); // GET
+  return apiFetch(path); 
 }
