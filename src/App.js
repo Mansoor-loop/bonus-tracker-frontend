@@ -6,6 +6,7 @@ import TopNav from "./components/TopNav";
 import TopGuns from "./pages/TopGuns";
 import QueueManagement from "./pages/QueueManagement";
 import GoldRush from "./pages/GoldRush";
+import DialerDetails from "./pages/DialerDetails";
 
 
 export default function App() {
@@ -21,6 +22,7 @@ export default function App() {
             <Route path="/admin" element={<AdminBonus />} />
             <Route path="/queue" element={<QueueManagement />} />
              <Route path="/goldrush" element={<GoldRush />} />
+             <Route path="/dialer" element={<DialerDetails />} />
           </Routes>
 
         </div>

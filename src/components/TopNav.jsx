@@ -32,6 +32,7 @@ export default function TopNav() {
       { to: "/goldrush", label: "GOLD RUSH" },
       { to: "/top-guns", label: "TOP GUNS" },
       { to: "/queue", label: "QUEUE" },
+      { to: "/dialerKj", label: "DIALER" },
       { to: "/admin", label: "ADMIN LOGIN", admin: true },
     ],
     []

@@ -622,25 +622,44 @@ function playScoobySound() {
   return data;
 }, [filteredRows, sort.key, sort.dir, columns]);
 
+  
 
+const counts = useMemo(() => {
+  const total = filteredRows.length;
+  let sale = 0;
+  let processing = 0;
+  let returned = 0;
+  let homeOffice = 0;
 
-  const counts = useMemo(() => {
-    const total = rows.length;
-    let sale = 0;
-    let processing = 0;
-    let returned = 0;
-    let homeOffice = 0;
+  for (const r of filteredRows) {
+    const out = normalizeOutcome(r.processingStage, r.closerStatus);
+    if (out === "Sale") sale += 1;
+    else if (out === "Processing") processing += 1;
+    else if (out === "Returned") returned += 1;
+    else if (out === "Home Office") homeOffice += 1;
+  }
 
-    for (const r of rows) {
-      const out = normalizeOutcome(r.processingStage, r.closerStatus);
-      if (out === "Sale") sale += 1;
-      else if (out === "Processing") processing += 1;
-      else if (out === "Returned") returned += 1;
-      else if (out === "Home Office") homeOffice += 1;
-    }
+  return { total, sale, processing, returned, homeOffice };
+}, [filteredRows]);
 
-    return { total, sale, processing, returned, homeOffice };
-  }, [rows]);
+const carrierCounts = useMemo(() => {
+  const map = new Map();
+
+  for (const r of filteredRows) {
+    const outcome = normalizeOutcome(r.processingStage, r.closerStatus);
+    if (outcome !== "Sale") continue;
+
+    const carrier = safeStr(r.carrier) || "-";
+    if (!carrier || carrier === "-") continue;
+
+    map.set(carrier, (map.get(carrier) || 0) + 1);
+  }
+
+  return Array.from(map.entries())
+    .sort((a, b) => b[1] - a[1])
+    .map(([carrier, count]) => ({ carrier, count }));
+}, [filteredRows]);
+
   const teamOptions = useMemo(() => {
   const set = new Set();
   for (const r of rows) {
@@ -801,7 +820,7 @@ const qualifierOptions = useMemo(() => {
                 <span style={pillStyle("#c6b1ee")}>Home Office: {counts.homeOffice}</span>
               </div>
             </div>
-
+               
             <div style={{ textAlign: "right" }}>
               <button
                 onClick={() => load({ silent: false })}
@@ -881,6 +900,18 @@ const qualifierOptions = useMemo(() => {
                       Clear
                     </button>
                   </div>
+                  {carrierCounts.length > 0 && (
+              <div style={{ marginTop: 20, display: "flex", gap: 10, flexWrap: "wrap" }}>
+                {carrierCounts.slice(0, 12).map((c) => (
+                  <span key={c.carrier} style={pillStyle("#fff")}>
+                    {c.carrier}: {c.count}
+                  </span>
+                ))}
+                {carrierCounts.length > 12 && (
+                  <span style={pillStyle("#fff")}>+{carrierCounts.length - 12} more</span>
+                )}
+              </div>
+            )}     
         </SketchCard>
 
         <div style={{ marginTop: 18 }}>
